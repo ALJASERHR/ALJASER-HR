@@ -693,7 +693,7 @@
       </div>
       <div id="emp-tab-comp" class="emp-tab" style="display:none">
         <div class="form-grid">
-          <div class="field"><label>Basic Salary (SAR)</label><input type="number" id="f_basic" /></div>
+          <div class="field"><label>Basic Salary (KWD)</label><input type="number" id="f_basic" /></div>
           <div class="field"><label>Housing</label><input type="number" id="f_housing" /></div>
           <div class="field"><label>Transport</label><input type="number" id="f_transport" /></div>
           <div class="field"><label>Other Allowance</label><input type="number" id="f_otherAllow" /></div>
@@ -778,7 +778,7 @@ const SESS_KEY='aljaser_hr_session_v2';
 const DEFAULT_DEPTS=['Operations','Sales','Ticketing','Visa Services','Hajj & Umrah','Finance','Admin','HR'];
 
 const SEED={
-  settings:{company:'AL JASER TRAVELS',cr:'1010XXXXXX',address:'King Fahd Road, Riyadh',phone:'+966 11 000 0000',email:'hr@aljasertravels.sa',currency:'SAR',annual:21,sick:30,emergency:5,hajj:10,hours:8,ot:1.5,gosiEmp:9.75,gosiCo:11.75},
+  settings:{company:'AL JASER TRAVELS',cr:'1010XXXXXX',address:'King Fahd Road, Riyadh',phone:'+966 11 000 0000',email:'hr@aljasertravels.sa',currency:'KWD',annual:21,sick:30,emergency:5,hajj:10,hours:8,ot:1.5,gosiEmp:9.75,gosiCo:11.75},
   departments:DEFAULT_DEPTS,
   employees:[
     {id:'EMP001',name:'Osama',nameAr:'',nationality:'',gender:'Male',dob:'',marital:'',phone:'',email:'',address:'',dept:'Admin',position:'General Manager',joined:'',contract:'Permanent',manager:'',location:'',iqama:'',iqamaExp:'',passport:'',passportExp:'',bank:'',iban:'',basic:0,housing:0,transport:0,otherAllow:0,annualBal:21,sickBal:30,status:'Active'},
@@ -845,7 +845,7 @@ let currentUser=null;
 /* ===== HELPERS ===== */
 function pad(n){return String(n).padStart(2,'0')}
 function fmtDate(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
-function fmtMoney(n){return (n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function fmtMoney(n){return (n||0).toLocaleString('en-US',{minimumFractionDigits:3,maximumFractionDigits:3})}
 function initials(name){return (name||'?').split(' ').slice(0,2).map(p=>p[0]).join('').toUpperCase()}
 function $(s){return document.querySelector(s)}
 function $$(s){return document.querySelectorAll(s)}
@@ -1181,7 +1181,7 @@ function renderDashboard(){
     ${statCard('◉','Active Employees',total,'#0f4c81','#e8f1fb')}
     ${statCard('✈','On Leave Today',onLeave,'#c97a08','#fff4e0')}
     ${statCard('⌛','Pending Approvals',pendingLeaves,'#d9362b','#fdecea')}
-    ${statCard('₪','Monthly Payroll','SAR '+fmtMoney(totalSal),'#1f9d55','#e6f7ee')}
+    ${statCard('₪','Monthly Payroll','KWD '+fmtMoney(totalSal),'#1f9d55','#e6f7ee')}
   `;
   const deptCounts={};
   db.employees.forEach(e=>{if(e.status==='Active')deptCounts[e.dept]=(deptCounts[e.dept]||0)+1});
@@ -1500,9 +1500,9 @@ function drawPayroll(){
   const totalGosi=slips.reduce((s,x)=>s+x.gosi,0);
   const totalOT=slips.reduce((s,x)=>s+x.otPay,0);
   $('#payStats').innerHTML=`
-    ${statCard('₪','Total Net Pay','SAR '+fmtMoney(totalNet),'#0f4c81','#e8f1fb')}
-    ${statCard('◈','Total GOSI','SAR '+fmtMoney(totalGosi),'#c97a08','#fff4e0')}
-    ${statCard('◷','Overtime Pay','SAR '+fmtMoney(totalOT),'#1f9d55','#e6f7ee')}
+    ${statCard('₪','Total Net Pay','KWD '+fmtMoney(totalNet),'#0f4c81','#e8f1fb')}
+    ${statCard('◈','Total GOSI','KWD '+fmtMoney(totalGosi),'#c97a08','#fff4e0')}
+    ${statCard('◷','Overtime Pay','KWD '+fmtMoney(totalOT),'#1f9d55','#e6f7ee')}
     ${statCard('◉','Employees Paid',slips.length,'#2563eb','#e3edff')}`;
   $('#payTable').innerHTML=slips.map(({e,...s})=>`
     <tr><td><div class="emp-cell"><div class="avatar">${initials(e.name)}</div><div><div class="emp-name">${e.name}</div><div class="emp-meta">${e.position||''}</div></div></div></td>
@@ -1542,7 +1542,7 @@ function buildPayslipHTML(empId,month){
       <div class="payslip-row"><span>Days Present</span><span>${s.presentDays}</span></div>
       <div class="payslip-row"><span>Overtime Hours</span><span>${s.otHours.toFixed(2)}</span></div>
     </div>
-    <div class="payslip-section"><h4>Earnings (SAR)</h4>
+    <div class="payslip-section"><h4>Earnings (KWD)</h4>
       <div class="payslip-row"><span>Basic</span><span>${fmtMoney(e.basic)}</span></div>
       <div class="payslip-row"><span>Housing</span><span>${fmtMoney(e.housing)}</span></div>
       <div class="payslip-row"><span>Transport</span><span>${fmtMoney(e.transport)}</span></div>
@@ -1550,12 +1550,12 @@ function buildPayslipHTML(empId,month){
       <div class="payslip-row"><span>Overtime</span><span>${fmtMoney(s.otPay)}</span></div>
       <div class="payslip-row total"><span>Gross</span><span>${fmtMoney(e.basic+s.allow+s.otPay)}</span></div>
     </div>
-    <div class="payslip-section"><h4>Deductions (SAR)</h4>
+    <div class="payslip-section"><h4>Deductions (KWD)</h4>
       <div class="payslip-row"><span>GOSI ${s.isSaudi?'('+db.settings.gosiEmp+'%)':'(N/A)'}</span><span>${fmtMoney(s.gosi)}</span></div>
       <div class="payslip-row total"><span>Total Deductions</span><span>${fmtMoney(s.gosi)}</span></div>
     </div>
     <div class="payslip-row total" style="font-size:16px;background:var(--primary-light);padding:14px;border-radius:6px;border:none">
-      <span>NET PAY</span><span style="color:var(--primary)">SAR ${fmtMoney(s.net)}</span>
+      <span>NET PAY</span><span style="color:var(--primary)">KWD ${fmtMoney(s.net)}</span>
     </div>
     <div style="margin-top:18px;font-size:11px;color:var(--muted);text-align:center">System-generated payslip.</div>
   </div>`;
