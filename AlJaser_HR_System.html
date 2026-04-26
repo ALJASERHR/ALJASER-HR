@@ -1,0 +1,1660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AL JASER TRAVELS — HR System</title>
+<style>
+  :root{
+    --primary:#0f4c81; --primary-dark:#0a345a; --primary-light:#e8f1fb;
+    --accent:#d4a017; --bg:#f4f6fa; --card:#ffffff;
+    --text:#1a2540; --muted:#6b7892; --border:#e3e8f0;
+    --success:#1f9d55; --success-bg:#e6f7ee;
+    --danger:#d9362b; --danger-bg:#fdecea;
+    --warn:#c97a08; --warn-bg:#fff4e0;
+    --info:#2563eb; --info-bg:#e3edff;
+    --shadow:0 1px 3px rgba(15,76,129,.06), 0 4px 16px rgba(15,76,129,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+  button{font-family:inherit;cursor:pointer;border:none;background:none}
+  input,select,textarea{font-family:inherit;font-size:14px}
+
+  /* ===== LOGIN SCREEN ===== */
+  .login-screen{
+    position:fixed;inset:0;background:linear-gradient(135deg,var(--primary) 0%,var(--primary-dark) 100%);
+    display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px;
+  }
+  .login-screen.hidden{display:none}
+  .login-card{
+    background:#fff;border-radius:14px;padding:36px 32px;width:100%;max-width:400px;
+    box-shadow:0 20px 60px rgba(0,0,0,.25);
+  }
+  .login-logo{text-align:center;margin-bottom:26px}
+  .login-logo h1{font-size:22px;color:var(--primary);font-weight:700}
+  .login-logo p{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-top:4px}
+  .login-card h2{font-size:18px;margin-bottom:6px}
+  .login-card .sub{color:var(--muted);font-size:13px;margin-bottom:20px}
+  .login-field{margin-bottom:14px}
+  .login-field label{display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--text)}
+  .login-field input{width:100%;padding:11px 13px;border:1px solid var(--border);border-radius:8px}
+  .login-field input:focus{outline:none;border-color:var(--primary)}
+  .login-card .btn-primary{width:100%;padding:12px;font-size:14px;margin-top:6px}
+  .login-hint{
+    margin-top:18px;padding:12px;background:var(--primary-light);
+    border-radius:8px;font-size:12px;color:var(--text);
+  }
+  .login-hint b{color:var(--primary)}
+  .login-error{color:var(--danger);font-size:12px;margin-top:8px;text-align:center;min-height:16px}
+
+  /* ===== LAYOUT ===== */
+  .app{display:flex;min-height:100vh}
+  .sidebar{width:240px;background:var(--primary-dark);color:#fff;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh}
+  .brand{padding:22px 20px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .brand-name{font-size:16px;font-weight:700;letter-spacing:.3px}
+  .brand-tag{font-size:11px;color:#9bb6d3;margin-top:3px;text-transform:uppercase;letter-spacing:1px}
+  .nav{padding:16px 10px;flex:1;overflow-y:auto}
+  .nav-section{
+    font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#7a93b3;
+    padding:10px 14px 4px;margin-top:6px;
+  }
+  .nav-item{display:flex;align-items:center;gap:12px;padding:11px 14px;color:#cdd9eb;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;margin-bottom:2px;transition:background .15s}
+  .nav-item:hover{background:rgba(255,255,255,.06);color:#fff}
+  .nav-item.active{background:var(--primary);color:#fff}
+  .nav-item .icon{font-size:16px;width:20px;text-align:center}
+  .sidebar-footer{padding:14px 18px;border-top:1px solid rgba(255,255,255,.08);font-size:11px;color:#7a93b3}
+
+  .main{flex:1;display:flex;flex-direction:column;min-width:0}
+  .topbar{background:var(--card);border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+  .topbar h1{font-size:18px;font-weight:600}
+  .topbar-right{display:flex;align-items:center;gap:14px}
+  .top-search{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;width:240px;font-size:13px}
+  .top-search:focus{outline:none;border-color:var(--primary)}
+  .user-chip{display:flex;align-items:center;gap:10px;padding:6px 12px;background:var(--primary-light);border-radius:30px;font-size:13px;font-weight:500}
+  .user-avatar{width:28px;height:28px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+  .role-tag{font-size:10px;background:var(--accent);color:#fff;padding:2px 7px;border-radius:10px;text-transform:uppercase;font-weight:700;margin-left:4px}
+  .logout-btn{padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--muted);background:#fff}
+  .logout-btn:hover{color:var(--danger);border-color:var(--danger)}
+  .content{padding:28px;flex:1}
+
+  /* common components */
+  .page-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+  .page-head h2{font-size:20px;font-weight:600}
+  .page-head p{color:var(--muted);font-size:13px;margin-top:2px}
+  .btn{padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;display:inline-flex;align-items:center;gap:6px;transition:all .15s}
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-primary:hover{background:var(--primary-dark)}
+  .btn-secondary{background:var(--card);color:var(--text);border:1px solid var(--border)}
+  .btn-secondary:hover{background:var(--bg)}
+  .btn-success{background:var(--success);color:#fff}
+  .btn-danger{background:var(--danger);color:#fff}
+  .btn-sm{padding:6px 12px;font-size:12px}
+  .btn-icon{padding:6px;border-radius:6px;color:var(--muted)}
+  .btn-icon:hover{background:var(--bg);color:var(--primary)}
+  .card{background:var(--card);border-radius:10px;box-shadow:var(--shadow);padding:20px;margin-bottom:16px}
+  .card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .card-head h3{font-size:15px;font-weight:600}
+
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+  .stat-card{background:var(--card);border-radius:10px;padding:18px;box-shadow:var(--shadow);display:flex;align-items:center;gap:14px}
+  .stat-icon{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px}
+  .stat-info .label{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.5px}
+  .stat-info .value{font-size:22px;font-weight:700;margin-top:2px}
+
+  table{width:100%;border-collapse:collapse}
+  thead th{background:var(--bg);text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;padding:10px 14px;border-bottom:1px solid var(--border)}
+  tbody td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px}
+  tbody tr:hover{background:var(--bg)}
+  tbody tr:last-child td{border-bottom:none}
+  .table-wrap{overflow-x:auto;background:var(--card);border-radius:10px;box-shadow:var(--shadow)}
+
+  .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+  .badge.success{background:var(--success-bg);color:var(--success)}
+  .badge.danger{background:var(--danger-bg);color:var(--danger)}
+  .badge.warn{background:var(--warn-bg);color:var(--warn)}
+  .badge.info{background:var(--info-bg);color:var(--info)}
+  .badge.muted{background:var(--bg);color:var(--muted)}
+
+  .avatar{width:34px;height:34px;border-radius:50%;background:var(--primary);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+  .emp-cell{display:flex;align-items:center;gap:10px}
+  .emp-name{font-weight:600}
+  .emp-meta{font-size:11px;color:var(--muted)}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(15,37,64,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+  .modal-overlay.active{display:flex}
+  .modal{background:var(--card);border-radius:12px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto}
+  .modal-head{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+  .modal-head h3{font-size:17px;font-weight:600}
+  .modal-body{padding:22px 24px}
+  .modal-foot{padding:16px 24px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end}
+  .close-x{font-size:22px;color:var(--muted);background:none;border:none;cursor:pointer}
+
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .form-grid.full{grid-template-columns:1fr}
+  .field{display:flex;flex-direction:column;gap:5px}
+  .field.col-2{grid-column:span 2}
+  .field label{font-size:12px;font-weight:600;color:var(--text)}
+  .field label .req{color:var(--danger)}
+  .field input,.field select,.field textarea{padding:9px 12px;border:1px solid var(--border);border-radius:7px;background:var(--card)}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--primary)}
+  .field .hint{font-size:11px;color:var(--muted)}
+  .field input:disabled{background:var(--bg);color:var(--muted)}
+
+  .filters{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+  .filters select,.filters input{padding:8px 12px;border:1px solid var(--border);border-radius:7px;background:var(--card);font-size:13px}
+
+  .dash-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+  .dash-grid.three{grid-template-columns:1fr 1fr 1fr}
+  @media (max-width:980px){
+    .dash-grid,.dash-grid.three{grid-template-columns:1fr}
+    .form-grid{grid-template-columns:1fr}
+    .field.col-2{grid-column:span 1}
+    .top-search{width:140px}
+  }
+  @media (max-width:760px){
+    .sidebar{width:64px}
+    .brand-name,.brand-tag,.nav-item span:not(.icon),.sidebar-footer,.nav-section{display:none}
+    .nav-item{justify-content:center}
+    .content{padding:18px}
+  }
+
+  .att-day{display:flex;align-items:center;justify-content:space-between;padding:14px;background:var(--bg);border-radius:8px;margin-bottom:10px}
+  .clock-display{text-align:center;padding:24px;background:var(--primary-light);border-radius:10px;margin-bottom:16px}
+  .clock-time{font-size:36px;font-weight:700;color:var(--primary);font-variant-numeric:tabular-nums}
+  .clock-date{color:var(--muted);font-size:13px;margin-top:4px}
+
+  .progress{height:8px;background:var(--bg);border-radius:6px;overflow:hidden;margin-top:6px}
+  .progress-bar{height:100%;background:var(--primary);transition:width .3s}
+
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:18px}
+  .tab{padding:10px 16px;font-size:13px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer}
+  .tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+
+  .payslip{background:#fff;padding:24px;border:1px solid var(--border);border-radius:10px}
+  .payslip-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid var(--primary);padding-bottom:14px;margin-bottom:18px}
+  .payslip-section{margin-bottom:16px}
+  .payslip-section h4{font-size:13px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;letter-spacing:.5px}
+  .payslip-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed var(--border)}
+  .payslip-row.total{border-top:2px solid var(--text);border-bottom:none;font-weight:700;margin-top:6px;padding-top:10px}
+
+  .leave-bal-card{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .leave-bal-card .info{flex:1}
+  .leave-bal-card .nums{text-align:right;font-size:13px}
+
+  .empty{text-align:center;padding:40px 20px;color:var(--muted)}
+
+  .page{display:none}
+  .page.active{display:block}
+
+  .toast{position:fixed;top:80px;right:24px;background:var(--success);color:#fff;padding:12px 18px;border-radius:8px;font-size:13px;font-weight:500;box-shadow:0 4px 18px rgba(0,0,0,.15);z-index:200;transform:translateX(120%);transition:transform .3s}
+  .toast.show{transform:translateX(0)}
+  .toast.error{background:var(--danger)}
+
+  .role-only{display:none}
+  body[data-role="admin"] .role-admin{display:block}
+  body[data-role="admin"] .nav-item.role-admin{display:flex}
+  body[data-role="admin"] .nav-section.role-admin{display:block}
+  body[data-role="manager"] .role-manager,body[data-role="admin"] .role-manager{display:block}
+  body[data-role="manager"] .nav-item.role-manager,body[data-role="admin"] .nav-item.role-manager{display:flex}
+  body[data-role="manager"] .nav-section.role-manager,body[data-role="admin"] .nav-section.role-manager{display:block}
+  .role-employee{display:block}
+  .nav-item.role-employee{display:flex}
+  .nav-section.role-employee{display:block}
+
+  .profile-grid{display:grid;grid-template-columns:300px 1fr;gap:16px}
+  @media (max-width:760px){.profile-grid{grid-template-columns:1fr}}
+  .profile-side{text-align:center;padding:24px;background:var(--card);border-radius:10px;box-shadow:var(--shadow)}
+  .profile-avatar{width:96px;height:96px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:700;margin:0 auto 14px}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN SCREEN ===== -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <h1>AL JASER TRAVELS</h1>
+      <p>HR System</p>
+    </div>
+    <h2>Sign in</h2>
+    <p class="sub">Enter your credentials to continue</p>
+    <div class="login-field">
+      <label>Username or Email</label>
+      <input id="loginUser" autocomplete="username" />
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="loginPass" autocomplete="current-password" onkeypress="if(event.key==='Enter')doLogin()" />
+    </div>
+    <button class="btn btn-primary" onclick="doLogin()">Sign in</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<div class="app" id="app" style="display:none">
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-name">AL JASER TRAVELS</div>
+      <div class="brand-tag">HR System</div>
+    </div>
+    <nav class="nav" id="mainNav">
+      <!-- Built dynamically based on role -->
+    </nav>
+    <div class="sidebar-footer">v1.1 • Local data<br>© AL JASER TRAVELS</div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div class="main">
+    <header class="topbar">
+      <h1 id="pageTitle">Dashboard</h1>
+      <div class="topbar-right">
+        <input class="top-search role-admin" id="globalSearch" placeholder="Search employees…" style="display:none" />
+        <div class="user-chip">
+          <div class="user-avatar" id="topAvatar">??</div>
+          <div><span id="topUserName">User</span><span class="role-tag" id="topUserRole">USER</span></div>
+        </div>
+        <button class="logout-btn" onclick="doLogout()">Sign out</button>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- ============================================
+           EMPLOYEE / MY VIEW PAGES
+      ============================================ -->
+
+      <!-- ===== MY DASHBOARD ===== -->
+      <section class="page" id="page-my-dashboard">
+        <div class="page-head">
+          <div>
+            <h2>Welcome, <span id="myFirstName"></span> 👋</h2>
+            <p id="myTodayLabel"></p>
+          </div>
+        </div>
+        <div class="stats" id="myStats"></div>
+        <div class="dash-grid">
+          <div class="card">
+            <div class="card-head"><h3>Quick Check-In</h3></div>
+            <div class="clock-display">
+              <div class="clock-time" id="myLiveClock">--:--:--</div>
+              <div class="clock-date" id="myLiveDate"></div>
+            </div>
+            <div style="display:flex;gap:10px;justify-content:center">
+              <button class="btn btn-success" onclick="myCheckIn()">Check In</button>
+              <button class="btn btn-danger" onclick="myCheckOut()">Check Out</button>
+            </div>
+            <div id="myTodayStatus" style="margin-top:14px;text-align:center;color:var(--muted);font-size:13px"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>My Recent Leaves</h3></div>
+            <div id="myRecentLeaves"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== MY PROFILE ===== -->
+      <section class="page" id="page-my-profile">
+        <div class="page-head">
+          <div><h2>My Profile</h2><p>Your personal and employment information.</p></div>
+        </div>
+        <div class="profile-grid">
+          <div class="profile-side">
+            <div class="profile-avatar" id="myProfileAvatar">??</div>
+            <h3 id="myProfileName" style="font-size:17px"></h3>
+            <p class="emp-meta" id="myProfilePosition"></p>
+            <div style="margin-top:14px"><span class="badge success" id="myProfileStatus">Active</span></div>
+            <div style="margin-top:18px;text-align:left;font-size:13px">
+              <div style="margin-bottom:6px"><b>ID:</b> <span id="myProfileId"></span></div>
+              <div style="margin-bottom:6px"><b>Email:</b> <span id="myProfileEmail"></span></div>
+              <div style="margin-bottom:6px"><b>Phone:</b> <span id="myProfilePhone"></span></div>
+              <div><b>Joined:</b> <span id="myProfileJoined"></span></div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="card-head"><h3>Personal</h3></div>
+              <div class="form-grid">
+                <div class="field"><label>Full Name</label><input id="my_name" disabled /></div>
+                <div class="field"><label>Name (Arabic)</label><input id="my_nameAr" dir="rtl" disabled /></div>
+                <div class="field"><label>Nationality</label><input id="my_nationality" disabled /></div>
+                <div class="field"><label>Gender</label><input id="my_gender" disabled /></div>
+                <div class="field"><label>DOB</label><input id="my_dob" disabled /></div>
+                <div class="field"><label>Marital Status</label><input id="my_marital" disabled /></div>
+                <div class="field col-2"><label>Address</label><input id="my_address" disabled /></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h3>Job</h3></div>
+              <div class="form-grid">
+                <div class="field"><label>Department</label><input id="my_dept" disabled /></div>
+                <div class="field"><label>Position</label><input id="my_position" disabled /></div>
+                <div class="field"><label>Contract Type</label><input id="my_contract" disabled /></div>
+                <div class="field"><label>Manager</label><input id="my_managerName" disabled /></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h3>Documents</h3></div>
+              <div class="form-grid">
+                <div class="field"><label>Iqama / National ID</label><input id="my_iqama" disabled /></div>
+                <div class="field"><label>Iqama Expiry</label><input id="my_iqamaExp" disabled /></div>
+                <div class="field"><label>Passport</label><input id="my_passport" disabled /></div>
+                <div class="field"><label>Passport Expiry</label><input id="my_passportExp" disabled /></div>
+                <div class="field"><label>Bank</label><input id="my_bank" disabled /></div>
+                <div class="field"><label>IBAN</label><input id="my_iban" disabled /></div>
+              </div>
+              <p style="font-size:12px;color:var(--muted);margin-top:10px">To update any of these details, please contact HR.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== MY ATTENDANCE ===== -->
+      <section class="page" id="page-my-attendance">
+        <div class="page-head">
+          <div><h2>My Attendance</h2><p>Your check-in / check-out history and hours worked.</p></div>
+        </div>
+        <div class="dash-grid">
+          <div class="card">
+            <div class="card-head"><h3>Monthly Log</h3></div>
+            <div class="filters">
+              <input type="month" id="myAttMonth" />
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Hours</th><th>OT</th><th>Status</th></tr></thead>
+                <tbody id="myAttTable"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>Month Summary</h3></div>
+            <div id="myAttSummary"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== MY LEAVES ===== -->
+      <section class="page" id="page-my-leaves">
+        <div class="page-head">
+          <div><h2>My Leaves</h2><p>Request leaves and view your balance.</p></div>
+          <button class="btn btn-primary" onclick="openMyLeaveModal()">+ Request Leave</button>
+        </div>
+        <div class="dash-grid">
+          <div class="card">
+            <div class="card-head"><h3>My Requests</h3></div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Status</th><th>Reason</th></tr></thead>
+                <tbody id="myLeavesTable"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>My Balances</h3></div>
+            <div id="myLeaveBal"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== MY PAYSLIPS ===== -->
+      <section class="page" id="page-my-payslips">
+        <div class="page-head">
+          <div><h2>My Payslips</h2><p>View and print your monthly payslips.</p></div>
+        </div>
+        <div class="card">
+          <div class="filters">
+            <input type="month" id="myPaySlipMonth" />
+            <button class="btn btn-primary btn-sm" onclick="viewMyPayslip()">View Payslip</button>
+          </div>
+          <div id="myPayslipPreview" style="margin-top:14px"></div>
+        </div>
+      </section>
+
+      <!-- ============================================
+           MANAGER VIEW
+      ============================================ -->
+      <section class="page" id="page-team">
+        <div class="page-head">
+          <div><h2>My Team</h2><p>View attendance, leaves and details for your direct reports.</p></div>
+        </div>
+        <div class="stats" id="teamStats"></div>
+        <div class="card">
+          <div class="card-head"><h3>Team Members</h3></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Employee</th><th>Position</th><th>Today</th><th>Annual Leave Bal</th><th>Pending Leaves</th></tr></thead>
+              <tbody id="teamTable"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Pending Leave Requests (Team)</h3></div>
+          <div id="teamPendingLeaves"></div>
+        </div>
+      </section>
+
+      <!-- ============================================
+           ADMIN PAGES (full system)
+      ============================================ -->
+
+      <!-- DASHBOARD -->
+      <section class="page" id="page-dashboard">
+        <div class="page-head">
+          <div><h2>HR Dashboard 👋</h2><p id="todayLabel"></p></div>
+        </div>
+        <div class="stats" id="dashStats"></div>
+        <div class="dash-grid">
+          <div class="card"><div class="card-head"><h3>Department Headcount</h3></div><div id="deptChart"></div></div>
+          <div class="card"><div class="card-head"><h3>Pending Leave Requests</h3></div><div id="pendingLeave"></div></div>
+        </div>
+        <div class="dash-grid three" style="margin-top:16px">
+          <div class="card"><div class="card-head"><h3>Upcoming Birthdays</h3></div><div id="upBirthdays"></div></div>
+          <div class="card"><div class="card-head"><h3>Iqama / Passport Expiry</h3></div><div id="upExpiry"></div></div>
+          <div class="card"><div class="card-head"><h3>Today's Attendance</h3></div><div id="todayAtt"></div></div>
+        </div>
+      </section>
+
+      <!-- EMPLOYEES -->
+      <section class="page" id="page-employees">
+        <div class="page-head">
+          <div><h2>Employees</h2><p>Manage your team's records, contracts and documents.</p></div>
+          <button class="btn btn-primary" onclick="openEmployeeModal()">+ Add Employee</button>
+        </div>
+        <div class="filters">
+          <input id="empSearch" placeholder="Search by name or ID…" />
+          <select id="empDeptFilter"><option value="">All departments</option></select>
+          <select id="empStatusFilter">
+            <option value="">All statuses</option><option>Active</option><option>On Leave</option><option>Terminated</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Employee</th><th>ID</th><th>Department</th><th>Position</th><th>Joined</th><th>Status</th><th></th></tr></thead>
+            <tbody id="empTable"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- USERS / ACCESS -->
+      <section class="page" id="page-users">
+        <div class="page-head">
+          <div><h2>User Accounts</h2><p>Create login accounts and assign roles to employees.</p></div>
+          <button class="btn btn-primary" onclick="openUserModal()">+ New User</button>
+        </div>
+        <div class="card">
+          <div style="background:var(--info-bg);color:var(--info);padding:12px 16px;border-radius:8px;margin-bottom:14px;font-size:13px">
+            <b>How it works:</b> Each user has a username, password, and role. Employee/Manager users are linked to an employee record so they only see their own data. Admins see everything.
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Username</th><th>Linked Employee</th><th>Role</th><th>Last Login</th><th></th></tr></thead>
+              <tbody id="usersTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ATTENDANCE -->
+      <section class="page" id="page-attendance">
+        <div class="page-head"><div><h2>Attendance</h2><p>Track daily check-in / check-out, working hours and overtime.</p></div></div>
+        <div class="dash-grid">
+          <div class="card">
+            <div class="tabs">
+              <div class="tab active" data-att-tab="today">Today</div>
+              <div class="tab" data-att-tab="month">Monthly</div>
+            </div>
+            <div id="att-tab-today">
+              <div class="filters"><select id="attEmployeeSelect"></select></div>
+              <div class="clock-display">
+                <div class="clock-time" id="liveClock">--:--:--</div>
+                <div class="clock-date" id="liveDate"></div>
+              </div>
+              <div style="display:flex;gap:10px;justify-content:center">
+                <button class="btn btn-success" onclick="checkIn()">Check In</button>
+                <button class="btn btn-danger" onclick="checkOut()">Check Out</button>
+              </div>
+              <div style="margin-top:18px">
+                <h4 style="font-size:13px;margin-bottom:10px;color:var(--muted)">RECENT TODAY</h4>
+                <div id="todayAttList"></div>
+              </div>
+            </div>
+            <div id="att-tab-month" style="display:none">
+              <div class="filters">
+                <select id="attMonthEmp"></select>
+                <input type="month" id="attMonthPick" />
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead><tr><th>Date</th><th>Check In</th><th>Check Out</th><th>Hours</th><th>OT</th><th>Status</th></tr></thead>
+                  <tbody id="attMonthTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <div class="card"><div class="card-head"><h3>Today's Summary</h3></div><div id="attSummary"></div></div>
+        </div>
+      </section>
+
+      <!-- LEAVE -->
+      <section class="page" id="page-leave">
+        <div class="page-head">
+          <div><h2>Leave Management</h2><p>Annual, sick, emergency leaves — request, approve and track balances.</p></div>
+          <button class="btn btn-primary" onclick="openLeaveModal()">+ New Request</button>
+        </div>
+        <div class="dash-grid">
+          <div class="card">
+            <div class="card-head"><h3>Leave Requests</h3></div>
+            <div class="filters">
+              <select id="leaveStatusFilter"><option value="">All</option><option>Pending</option><option>Approved</option><option>Rejected</option></select>
+              <select id="leaveTypeFilter"><option value="">All types</option><option>Annual</option><option>Sick</option><option>Emergency</option><option>Unpaid</option><option>Hajj</option></select>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Employee</th><th>Type</th><th>From</th><th>To</th><th>Days</th><th>Status</th><th></th></tr></thead>
+                <tbody id="leaveTable"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>Leave Balances</h3></div>
+            <select id="leaveBalEmp" style="width:100%;padding:9px;border:1px solid var(--border);border-radius:7px;margin-bottom:14px"></select>
+            <div id="leaveBalances"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PAYROLL -->
+      <section class="page" id="page-payroll">
+        <div class="page-head">
+          <div><h2>Payroll</h2><p>Salaries, allowances, deductions, GOSI and payslips.</p></div>
+          <button class="btn btn-primary" onclick="runPayroll()">Run Payroll for Month</button>
+        </div>
+        <div class="filters"><input type="month" id="payMonth" /></div>
+        <div class="stats" id="payStats"></div>
+        <div class="card">
+          <div class="card-head"><h3>Payslips — <span id="payMonthLabel"></span></h3></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Employee</th><th>Basic</th><th>Allowances</th><th>Overtime</th><th>Deductions</th><th>GOSI</th><th>Net Pay</th><th></th></tr></thead>
+              <tbody id="payTable"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- REPORTS -->
+      <section class="page" id="page-reports">
+        <div class="page-head"><div><h2>Reports</h2><p>Quick exports & summaries for management.</p></div></div>
+        <div class="stats" id="reportStats"></div>
+        <div class="dash-grid three">
+          <div class="card"><h3 style="font-size:14px;margin-bottom:10px">Employee Master List</h3><p style="color:var(--muted);font-size:12px;margin-bottom:14px">Full employee directory.</p><button class="btn btn-secondary btn-sm" onclick="exportCSV('employees')">⤓ Export CSV</button></div>
+          <div class="card"><h3 style="font-size:14px;margin-bottom:10px">Attendance Log</h3><p style="color:var(--muted);font-size:12px;margin-bottom:14px">All check-in/out records.</p><button class="btn btn-secondary btn-sm" onclick="exportCSV('attendance')">⤓ Export CSV</button></div>
+          <div class="card"><h3 style="font-size:14px;margin-bottom:10px">Leave History</h3><p style="color:var(--muted);font-size:12px;margin-bottom:14px">All leave requests.</p><button class="btn btn-secondary btn-sm" onclick="exportCSV('leaves')">⤓ Export CSV</button></div>
+          <div class="card"><h3 style="font-size:14px;margin-bottom:10px">Payroll Register</h3><p style="color:var(--muted);font-size:12px;margin-bottom:14px">All payslips by month.</p><button class="btn btn-secondary btn-sm" onclick="exportCSV('payroll')">⤓ Export CSV</button></div>
+          <div class="card"><h3 style="font-size:14px;margin-bottom:10px">Iqama Expiry Report</h3><p style="color:var(--muted);font-size:12px;margin-bottom:14px">Documents needing renewal.</p><button class="btn btn-secondary btn-sm" onclick="exportCSV('expiry')">⤓ Export CSV</button></div>
+          <div class="card">
+            <h3 style="font-size:14px;margin-bottom:10px">Backup / Restore</h3>
+            <p style="color:var(--muted);font-size:12px;margin-bottom:14px">Full JSON backup.</p>
+            <button class="btn btn-secondary btn-sm" onclick="backupJSON()">⤓ Backup</button>
+            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('restoreFile').click()">⤒ Restore</button>
+            <input type="file" id="restoreFile" accept=".json" style="display:none" onchange="restoreJSON(event)" />
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS -->
+      <section class="page" id="page-settings">
+        <div class="page-head"><div><h2>Settings</h2><p>Company information, leave entitlements and policies.</p></div></div>
+        <div class="card">
+          <div class="card-head"><h3>Company Information</h3></div>
+          <div class="form-grid">
+            <div class="field"><label>Company Name</label><input id="setCompany" /></div>
+            <div class="field"><label>CR Number</label><input id="setCR" /></div>
+            <div class="field"><label>Address</label><input id="setAddress" /></div>
+            <div class="field"><label>Phone</label><input id="setPhone" /></div>
+            <div class="field"><label>Email</label><input id="setEmail" /></div>
+            <div class="field"><label>Currency</label><input id="setCurrency" /></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Leave Entitlements</h3></div>
+          <div class="form-grid">
+            <div class="field"><label>Annual</label><input type="number" id="setAnnual" /></div>
+            <div class="field"><label>Sick</label><input type="number" id="setSick" /></div>
+            <div class="field"><label>Emergency</label><input type="number" id="setEmergency" /></div>
+            <div class="field"><label>Hajj</label><input type="number" id="setHajj" /></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Payroll Settings</h3></div>
+          <div class="form-grid">
+            <div class="field"><label>Standard Hours/Day</label><input type="number" id="setHours" /></div>
+            <div class="field"><label>OT Multiplier</label><input type="number" step="0.1" id="setOT" /></div>
+            <div class="field"><label>GOSI Employee %</label><input type="number" step="0.1" id="setGosiEmp" /></div>
+            <div class="field"><label>GOSI Employer %</label><input type="number" step="0.1" id="setGosiCo" /></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
+          <button class="btn btn-secondary" onclick="resetDemoData()">Reset Demo Data</button>
+          <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- ===== EMPLOYEE MODAL ===== -->
+<div class="modal-overlay" id="empModal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="empModalTitle">Add Employee</h3><button class="close-x" onclick="closeModal('empModal')">×</button></div>
+    <div class="modal-body">
+      <div class="tabs">
+        <div class="tab active" data-emp-tab="basic">Basic</div>
+        <div class="tab" data-emp-tab="job">Job</div>
+        <div class="tab" data-emp-tab="docs">Documents</div>
+        <div class="tab" data-emp-tab="comp">Compensation</div>
+      </div>
+      <div id="emp-tab-basic" class="emp-tab">
+        <div class="form-grid">
+          <div class="field"><label>Employee ID <span class="req">*</span></label><input id="f_id" /></div>
+          <div class="field"><label>Status</label><select id="f_status"><option>Active</option><option>On Leave</option><option>Terminated</option></select></div>
+          <div class="field"><label>Full Name (English) <span class="req">*</span></label><input id="f_name" /></div>
+          <div class="field"><label>Full Name (Arabic)</label><input id="f_nameAr" dir="rtl" /></div>
+          <div class="field"><label>Nationality</label><input id="f_nationality" /></div>
+          <div class="field"><label>Gender</label><select id="f_gender"><option>Male</option><option>Female</option></select></div>
+          <div class="field"><label>Date of Birth</label><input type="date" id="f_dob" /></div>
+          <div class="field"><label>Marital Status</label><select id="f_marital"><option>Single</option><option>Married</option><option>Divorced</option></select></div>
+          <div class="field"><label>Phone</label><input id="f_phone" /></div>
+          <div class="field"><label>Email</label><input type="email" id="f_email" /></div>
+          <div class="field col-2"><label>Address</label><input id="f_address" /></div>
+        </div>
+      </div>
+      <div id="emp-tab-job" class="emp-tab" style="display:none">
+        <div class="form-grid">
+          <div class="field"><label>Department <span class="req">*</span></label><select id="f_dept"></select></div>
+          <div class="field"><label>Position</label><input id="f_position" /></div>
+          <div class="field"><label>Date of Joining</label><input type="date" id="f_joined" /></div>
+          <div class="field"><label>Contract Type</label><select id="f_contract"><option>Permanent</option><option>Fixed-Term</option><option>Probation</option></select></div>
+          <div class="field"><label>Manager</label><select id="f_manager"></select></div>
+          <div class="field"><label>Work Location</label><input id="f_location" value="Riyadh" /></div>
+        </div>
+      </div>
+      <div id="emp-tab-docs" class="emp-tab" style="display:none">
+        <div class="form-grid">
+          <div class="field"><label>Iqama / National ID</label><input id="f_iqama" /></div>
+          <div class="field"><label>Iqama Expiry</label><input type="date" id="f_iqamaExp" /></div>
+          <div class="field"><label>Passport</label><input id="f_passport" /></div>
+          <div class="field"><label>Passport Expiry</label><input type="date" id="f_passportExp" /></div>
+          <div class="field"><label>Bank Name</label><input id="f_bank" /></div>
+          <div class="field"><label>IBAN</label><input id="f_iban" /></div>
+        </div>
+      </div>
+      <div id="emp-tab-comp" class="emp-tab" style="display:none">
+        <div class="form-grid">
+          <div class="field"><label>Basic Salary (SAR)</label><input type="number" id="f_basic" /></div>
+          <div class="field"><label>Housing</label><input type="number" id="f_housing" /></div>
+          <div class="field"><label>Transport</label><input type="number" id="f_transport" /></div>
+          <div class="field"><label>Other Allowance</label><input type="number" id="f_otherAllow" /></div>
+          <div class="field"><label>Annual Leave Balance</label><input type="number" id="f_annualBal" /></div>
+          <div class="field"><label>Sick Leave Balance</label><input type="number" id="f_sickBal" /></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('empModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEmployee()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== LEAVE MODAL ===== -->
+<div class="modal-overlay" id="leaveModal">
+  <div class="modal">
+    <div class="modal-head"><h3>New Leave Request</h3><button class="close-x" onclick="closeModal('leaveModal')">×</button></div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="field col-2" id="lf_empWrap"><label>Employee <span class="req">*</span></label><select id="lf_emp"></select></div>
+        <div class="field"><label>Leave Type</label><select id="lf_type"><option>Annual</option><option>Sick</option><option>Emergency</option><option>Unpaid</option><option>Hajj</option></select></div>
+        <div class="field" id="lf_statusWrap"><label>Status</label><select id="lf_status"><option>Pending</option><option>Approved</option><option>Rejected</option></select></div>
+        <div class="field"><label>From</label><input type="date" id="lf_from" /></div>
+        <div class="field"><label>To</label><input type="date" id="lf_to" /></div>
+        <div class="field col-2"><label>Reason</label><textarea id="lf_reason" rows="3"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('leaveModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveLeave()">Submit</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== USER MODAL ===== -->
+<div class="modal-overlay" id="userModal">
+  <div class="modal" style="max-width:500px">
+    <div class="modal-head"><h3 id="userModalTitle">Add User</h3><button class="close-x" onclick="closeModal('userModal')">×</button></div>
+    <div class="modal-body">
+      <div class="form-grid full">
+        <div class="field"><label>Username <span class="req">*</span></label><input id="u_username" /></div>
+        <div class="field"><label>Password <span class="req">*</span></label><input type="text" id="u_password" placeholder="Plain text — will be visible to admin" /></div>
+        <div class="field"><label>Role <span class="req">*</span></label>
+          <select id="u_role" onchange="onUserRoleChange()">
+            <option value="employee">Employee — sees only their own data</option>
+            <option value="manager">Manager — sees their team + own data</option>
+            <option value="admin">Admin — full system access</option>
+          </select>
+        </div>
+        <div class="field" id="u_empWrap"><label>Linked Employee</label><select id="u_empId"></select></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('userModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveUser()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAYSLIP MODAL ===== -->
+<div class="modal-overlay" id="payslipModal">
+  <div class="modal" style="max-width:720px">
+    <div class="modal-head"><h3>Payslip</h3><button class="close-x" onclick="closeModal('payslipModal')">×</button></div>
+    <div class="modal-body" id="payslipBody"></div>
+    <div class="modal-foot">
+      <button class="btn btn-secondary" onclick="closeModal('payslipModal')">Close</button>
+      <button class="btn btn-primary" onclick="window.print()">Print</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ====================================================================
+   AL JASER TRAVELS — HR SYSTEM v1.1 (with login + roles)
+==================================================================== */
+const LS_KEY='aljaser_hr_v2';
+const SESS_KEY='aljaser_hr_session_v2';
+const DEFAULT_DEPTS=['Operations','Sales','Ticketing','Visa Services','Hajj & Umrah','Finance','Admin','HR'];
+
+const SEED={
+  settings:{company:'AL JASER TRAVELS',cr:'1010XXXXXX',address:'King Fahd Road, Riyadh',phone:'+966 11 000 0000',email:'hr@aljasertravels.sa',currency:'SAR',annual:21,sick:30,emergency:5,hajj:10,hours:8,ot:1.5,gosiEmp:9.75,gosiCo:11.75},
+  departments:DEFAULT_DEPTS,
+  employees:[
+    {id:'EMP001',name:'Osama',nameAr:'',nationality:'',gender:'Male',dob:'',marital:'',phone:'',email:'',address:'',dept:'Admin',position:'General Manager',joined:'',contract:'Permanent',manager:'',location:'',iqama:'',iqamaExp:'',passport:'',passportExp:'',bank:'',iban:'',basic:0,housing:0,transport:0,otherAllow:0,annualBal:21,sickBal:30,status:'Active'},
+    {id:'EMP002',name:'Hajar Aldawsari',nameAr:'',nationality:'',gender:'Female',dob:'',marital:'',phone:'',email:'',address:'',dept:'',position:'',joined:'',contract:'',manager:'EMP001',location:'',iqama:'',iqamaExp:'',passport:'',passportExp:'',bank:'',iban:'',basic:0,housing:0,transport:0,otherAllow:0,annualBal:21,sickBal:30,status:'Active'},
+    {id:'EMP003',name:'Noor',nameAr:'',nationality:'',gender:'Female',dob:'',marital:'',phone:'',email:'',address:'',dept:'',position:'',joined:'',contract:'',manager:'EMP001',location:'',iqama:'',iqamaExp:'',passport:'',passportExp:'',bank:'',iban:'',basic:0,housing:0,transport:0,otherAllow:0,annualBal:21,sickBal:30,status:'Active'},
+    {id:'EMP004',name:'Hossam',nameAr:'',nationality:'',gender:'Male',dob:'',marital:'',phone:'',email:'',address:'',dept:'',position:'',joined:'',contract:'',manager:'EMP001',location:'',iqama:'',iqamaExp:'',passport:'',passportExp:'',bank:'',iban:'',basic:0,housing:0,transport:0,otherAllow:0,annualBal:21,sickBal:30,status:'Active'},
+    {id:'EMP005',name:'Shuada',nameAr:'',nationality:'',gender:'Female',dob:'',marital:'',phone:'',email:'',address:'',dept:'',position:'',joined:'',contract:'',manager:'EMP001',location:'',iqama:'',iqamaExp:'',passport:'',passportExp:'',bank:'',iban:'',basic:0,housing:0,transport:0,otherAllow:0,annualBal:21,sickBal:30,status:'Active'}
+  ],
+  users:[
+    {username:'admin',password:'AlJaser#HR2026',role:'admin',empId:null,lastLogin:''},
+    {username:'osama',password:'Osama@AJT2026',role:'admin',empId:'EMP001',lastLogin:''},
+    {username:'hajar',password:'Hajar@AJT2026',role:'employee',empId:'EMP002',lastLogin:''},
+    {username:'noor',password:'Noor@AJT2026',role:'employee',empId:'EMP003',lastLogin:''},
+    {username:'hossam',password:'Hossam@AJT2026',role:'employee',empId:'EMP004',lastLogin:''},
+    {username:'shuada',password:'Shuada@AJT2026',role:'employee',empId:'EMP005',lastLogin:''},
+  ],
+  attendance:[],leaves:[],payroll:[]
+};
+
+function seedAttendance(){
+  const today=new Date();
+  for(let d=14;d>=0;d--){
+    const date=new Date(today); date.setDate(today.getDate()-d);
+    if(date.getDay()===5) continue;
+    SEED.employees.forEach(e=>{
+      const present=Math.random()>0.05;
+      if(!present){SEED.attendance.push({empId:e.id,date:fmtDate(date),in:'',out:'',hours:0,ot:0,status:'Absent'});return}
+      const inH=8+Math.floor(Math.random()*2),inM=Math.floor(Math.random()*30);
+      const outH=17+Math.floor(Math.random()*2),outM=Math.floor(Math.random()*60);
+      const hours=Math.round(((outH+outM/60)-(inH+inM/60))*100)/100;
+      const ot=Math.max(0,Math.round((hours-8)*100)/100);
+      SEED.attendance.push({empId:e.id,date:fmtDate(date),in:`${pad(inH)}:${pad(inM)}`,out:`${pad(outH)}:${pad(outM)}`,hours,ot,status:'Present'});
+    });
+  }
+}
+function seedLeaves(){
+  const today=new Date();
+  const samples=[
+    {empId:'EMP002',type:'Annual',offset:[10,15],status:'Approved',reason:'Family vacation to Dubai'},
+    {empId:'EMP003',type:'Sick',offset:[3,4],status:'Approved',reason:'Flu'},
+    {empId:'EMP004',type:'Annual',offset:[20,30],status:'Pending',reason:'Visit family in India'},
+    {empId:'EMP008',type:'Emergency',offset:[1,2],status:'Pending',reason:'Family emergency'},
+    {empId:'EMP010',type:'Annual',offset:[5,8],status:'Pending',reason:'Personal travel'},
+    {empId:'EMP006',type:'Hajj',offset:[40,50],status:'Approved',reason:'Annual Hajj'},
+  ];
+  samples.forEach((s,i)=>{
+    const from=new Date(today);from.setDate(today.getDate()+s.offset[0]);
+    const to=new Date(today);to.setDate(today.getDate()+s.offset[1]);
+    SEED.leaves.push({id:'LV'+String(1001+i),empId:s.empId,type:s.type,from:fmtDate(from),to:fmtDate(to),days:s.offset[1]-s.offset[0]+1,status:s.status,reason:s.reason});
+  });
+}
+
+function loadDB(){
+  const raw=localStorage.getItem(LS_KEY);
+  if(raw) return JSON.parse(raw);
+  // Fresh start — no demo attendance/leaves
+  localStorage.setItem(LS_KEY,JSON.stringify(SEED));
+  return JSON.parse(localStorage.getItem(LS_KEY));
+}
+function saveDB(){localStorage.setItem(LS_KEY,JSON.stringify(db))}
+let db=loadDB();
+let currentUser=null;
+
+/* ===== HELPERS ===== */
+function pad(n){return String(n).padStart(2,'0')}
+function fmtDate(d){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
+function fmtMoney(n){return (n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function initials(name){return (name||'?').split(' ').slice(0,2).map(p=>p[0]).join('').toUpperCase()}
+function $(s){return document.querySelector(s)}
+function $$(s){return document.querySelectorAll(s)}
+function toast(msg,err){const t=$('#toast');t.textContent=msg;t.classList.toggle('error',!!err);t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400)}
+function daysBetween(a,b){return Math.floor((new Date(b)-new Date(a))/(1000*60*60*24))+1}
+function todayStr(){return fmtDate(new Date())}
+function monthStr(d=new Date()){return `${d.getFullYear()}-${pad(d.getMonth()+1)}`}
+function getEmp(id){return db.employees.find(e=>e.id===id)}
+function getMyEmp(){return currentUser&&currentUser.empId?getEmp(currentUser.empId):null}
+
+/* ===== AUTH ===== */
+function checkSession(){
+  const s=localStorage.getItem(SESS_KEY);
+  if(!s) return false;
+  try{
+    const sess=JSON.parse(s);
+    const u=db.users.find(x=>x.username===sess.username);
+    if(u){currentUser=u;return true}
+  }catch(e){}
+  return false;
+}
+function doLogin(){
+  const u=$('#loginUser').value.trim().toLowerCase();
+  const p=$('#loginPass').value;
+  const user=db.users.find(x=>x.username.toLowerCase()===u && x.password===p);
+  if(!user){$('#loginError').textContent='Invalid username or password';return}
+  user.lastLogin=new Date().toISOString();
+  saveDB();
+  currentUser=user;
+  localStorage.setItem(SESS_KEY,JSON.stringify({username:user.username}));
+  enterApp();
+}
+function doLogout(){
+  localStorage.removeItem(SESS_KEY);
+  currentUser=null;
+  $('#app').style.display='none';
+  $('#loginScreen').classList.remove('hidden');
+  $('#loginUser').value='';$('#loginPass').value='';$('#loginError').textContent='';
+}
+function enterApp(){
+  $('#loginScreen').classList.add('hidden');
+  $('#app').style.display='flex';
+  document.body.dataset.role=currentUser.role;
+  // top bar
+  const emp=getMyEmp();
+  const displayName=emp?emp.name:(currentUser.username==='admin'?'HR Admin':currentUser.username);
+  $('#topUserName').textContent=displayName;
+  $('#topAvatar').textContent=initials(displayName);
+  $('#topUserRole').textContent=currentUser.role;
+  // build nav
+  buildNav();
+  // route to default page
+  const def=defaultPage();
+  goPage(def);
+}
+function defaultPage(){
+  if(currentUser.role==='admin') return 'dashboard';
+  if(currentUser.role==='manager') return 'my-dashboard';
+  return 'my-dashboard';
+}
+function buildNav(){
+  const role=currentUser.role;
+  let html='';
+  // employee section
+  html+=`<div class="nav-section">My Workspace</div>`;
+  html+=navItem('my-dashboard','⌂','My Home');
+  html+=navItem('my-profile','◉','My Profile');
+  html+=navItem('my-attendance','◷','My Attendance');
+  html+=navItem('my-leaves','✈','My Leaves');
+  html+=navItem('my-payslips','₪','My Payslips');
+  // manager section
+  if(role==='manager'||role==='admin'){
+    html+=`<div class="nav-section">Team</div>`;
+    html+=navItem('team','◈','My Team');
+  }
+  // admin section
+  if(role==='admin'){
+    html+=`<div class="nav-section">HR Admin</div>`;
+    html+=navItem('dashboard','▦','HR Dashboard');
+    html+=navItem('employees','◉','Employees');
+    html+=navItem('attendance','◷','Attendance');
+    html+=navItem('leave','✈','Leave Management');
+    html+=navItem('payroll','₪','Payroll');
+    html+=navItem('reports','▤','Reports');
+    html+=navItem('users','⚷','Users & Access');
+    html+=navItem('settings','⚙','Settings');
+  }
+  $('#mainNav').innerHTML=html;
+  $$('.nav-item').forEach(it=>it.addEventListener('click',()=>goPage(it.dataset.page)));
+  $('#globalSearch').style.display=role==='admin'?'block':'none';
+}
+function navItem(page,icon,label){
+  return `<div class="nav-item" data-page="${page}"><span class="icon">${icon}</span><span>${label}</span></div>`;
+}
+function goPage(page){
+  $$('.nav-item').forEach(i=>i.classList.toggle('active',i.dataset.page===page));
+  $$('.page').forEach(p=>p.classList.remove('active'));
+  const el=$('#page-'+page); if(el) el.classList.add('active');
+  const item=document.querySelector(`.nav-item[data-page="${page}"]`);
+  $('#pageTitle').textContent=item?item.textContent.trim():'';
+  onPageOpen(page);
+}
+function onPageOpen(page){
+  const fn={
+    'my-dashboard':renderMyDashboard,'my-profile':renderMyProfile,
+    'my-attendance':renderMyAttendance,'my-leaves':renderMyLeaves,'my-payslips':renderMyPayslips,
+    'team':renderTeam,
+    'dashboard':renderDashboard,'employees':renderEmployees,
+    'attendance':renderAttendance,'leave':renderLeaves,
+    'payroll':renderPayroll,'reports':renderReports,
+    'users':renderUsers,'settings':renderSettings
+  }[page];
+  if(fn) fn();
+}
+
+/* ===== MODALS ===== */
+function openModal(id){$('#'+id).classList.add('active')}
+function closeModal(id){$('#'+id).classList.remove('active')}
+$$('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('active')}));
+$$('[data-emp-tab]').forEach(t=>t.addEventListener('click',()=>{
+  $$('[data-emp-tab]').forEach(x=>x.classList.remove('active'));t.classList.add('active');
+  $$('.emp-tab').forEach(p=>p.style.display='none');$('#emp-tab-'+t.dataset.empTab).style.display='block';
+}));
+$$('[data-att-tab]').forEach(t=>t.addEventListener('click',()=>{
+  $$('[data-att-tab]').forEach(x=>x.classList.remove('active'));t.classList.add('active');
+  $('#att-tab-today').style.display=t.dataset.attTab==='today'?'block':'none';
+  $('#att-tab-month').style.display=t.dataset.attTab==='month'?'block':'none';
+  if(t.dataset.attTab==='month') renderMonthAtt();
+}));
+
+/* ===========================================
+   EMPLOYEE / MY VIEW
+=========================================== */
+let myClockTimer=null;
+function renderMyDashboard(){
+  const emp=getMyEmp();
+  if(!emp){$('#page-my-dashboard').innerHTML='<div class="empty">No employee record linked to your account.</div>';return}
+  const today=new Date();
+  $('#myFirstName').textContent=emp.name.split(' ')[0];
+  $('#myTodayLabel').textContent=today.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  // stats
+  const myLeaves=db.leaves.filter(l=>l.empId===emp.id);
+  const pendingMine=myLeaves.filter(l=>l.status==='Pending').length;
+  const usedAnnual=db.settings.annual-(emp.annualBal||0);
+  const monthAtt=db.attendance.filter(a=>a.empId===emp.id && a.date.startsWith(monthStr()));
+  const monthHours=monthAtt.reduce((s,a)=>s+(a.hours||0),0);
+  $('#myStats').innerHTML=`
+    ${statCard('✈','Annual Leave Balance',(emp.annualBal||0)+' days','#0f4c81','#e8f1fb')}
+    ${statCard('●','Sick Leave Balance',(emp.sickBal||0)+' days','#1f9d55','#e6f7ee')}
+    ${statCard('⌛','Pending Requests',pendingMine,'#c97a08','#fff4e0')}
+    ${statCard('◷','This Month Hours',monthHours.toFixed(1)+'h','#2563eb','#e3edff')}
+  `;
+  // clock
+  if(myClockTimer) clearInterval(myClockTimer);
+  const upd=()=>{
+    const d=new Date();
+    $('#myLiveClock').textContent=`${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    $('#myLiveDate').textContent=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  };
+  upd();myClockTimer=setInterval(upd,1000);
+  // today status
+  const myToday=db.attendance.find(a=>a.empId===emp.id && a.date===todayStr());
+  $('#myTodayStatus').textContent=myToday?
+    `Today: In ${myToday.in||'—'} • Out ${myToday.out||'—'} • ${(myToday.hours||0)}h`:
+    'You haven\'t checked in today.';
+  // recent leaves
+  const recent=myLeaves.sort((a,b)=>b.from.localeCompare(a.from)).slice(0,5);
+  $('#myRecentLeaves').innerHTML=recent.length?recent.map(l=>`
+    <div class="leave-bal-card">
+      <div><div style="font-weight:600">${l.type}</div><div class="emp-meta">${l.from} → ${l.to} • ${l.days}d</div></div>
+      <span class="badge ${l.status==='Approved'?'success':l.status==='Rejected'?'danger':'warn'}">${l.status}</span>
+    </div>`).join(''):'<div class="empty">No leaves yet</div>';
+}
+function myCheckIn(){
+  const emp=getMyEmp();if(!emp){toast('No employee record',true);return}
+  const t=todayStr();
+  let rec=db.attendance.find(a=>a.empId===emp.id && a.date===t);
+  const time=`${pad(new Date().getHours())}:${pad(new Date().getMinutes())}`;
+  if(rec){if(rec.in){toast('Already checked in',true);return}rec.in=time;rec.status='Present'}
+  else db.attendance.push({empId:emp.id,date:t,in:time,out:'',hours:0,ot:0,status:'Present'});
+  saveDB();renderMyDashboard();toast('Checked in at '+time);
+}
+function myCheckOut(){
+  const emp=getMyEmp();if(!emp)return;
+  const t=todayStr();
+  const rec=db.attendance.find(a=>a.empId===emp.id && a.date===t);
+  if(!rec||!rec.in){toast('Check in first',true);return}
+  const now=new Date();
+  rec.out=`${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const [ih,im]=rec.in.split(':').map(Number);
+  rec.hours=Math.round(((now.getHours()+now.getMinutes()/60)-(ih+im/60))*100)/100;
+  rec.ot=Math.max(0,Math.round((rec.hours-(db.settings.hours||8))*100)/100);
+  saveDB();renderMyDashboard();toast('Checked out');
+}
+
+function renderMyProfile(){
+  const e=getMyEmp();if(!e)return;
+  $('#myProfileAvatar').textContent=initials(e.name);
+  $('#myProfileName').textContent=e.name;
+  $('#myProfilePosition').textContent=`${e.position||''} • ${e.dept}`;
+  $('#myProfileStatus').textContent=e.status;
+  $('#myProfileId').textContent=e.id;
+  $('#myProfileEmail').textContent=e.email||'-';
+  $('#myProfilePhone').textContent=e.phone||'-';
+  $('#myProfileJoined').textContent=e.joined||'-';
+  const set=(id,v)=>{const el=$('#'+id);if(el)el.value=v||''};
+  set('my_name',e.name);set('my_nameAr',e.nameAr);set('my_nationality',e.nationality);
+  set('my_gender',e.gender);set('my_dob',e.dob);set('my_marital',e.marital);set('my_address',e.address);
+  set('my_dept',e.dept);set('my_position',e.position);set('my_contract',e.contract);
+  const mgr=getEmp(e.manager);set('my_managerName',mgr?mgr.name:'—');
+  set('my_iqama',e.iqama);set('my_iqamaExp',e.iqamaExp);set('my_passport',e.passport);
+  set('my_passportExp',e.passportExp);set('my_bank',e.bank);set('my_iban',e.iban);
+}
+
+function renderMyAttendance(){
+  const e=getMyEmp();if(!e)return;
+  $('#myAttMonth').value=$('#myAttMonth').value||monthStr();
+  drawMyAtt();
+}
+function drawMyAtt(){
+  const e=getMyEmp();if(!e)return;
+  const m=$('#myAttMonth').value;
+  const list=db.attendance.filter(a=>a.empId===e.id&&a.date.startsWith(m)).sort((a,b)=>a.date.localeCompare(b.date));
+  $('#myAttTable').innerHTML=list.length?list.map(a=>`
+    <tr><td>${a.date}</td><td>${a.in||'-'}</td><td>${a.out||'-'}</td><td>${a.hours||0}</td><td>${a.ot||0}</td>
+    <td><span class="badge ${a.status==='Present'?'success':'danger'}">${a.status}</span></td></tr>
+  `).join(''):'<tr><td colspan="6"><div class="empty">No records</div></td></tr>';
+  const present=list.filter(a=>a.status==='Present').length;
+  const totalH=list.reduce((s,a)=>s+(a.hours||0),0);
+  const totalOT=list.reduce((s,a)=>s+(a.ot||0),0);
+  $('#myAttSummary').innerHTML=`
+    <div class="leave-bal-card"><div class="info">Days Present</div><div class="nums"><b>${present}</b></div></div>
+    <div class="leave-bal-card"><div class="info">Total Hours</div><div class="nums"><b>${totalH.toFixed(1)}h</b></div></div>
+    <div class="leave-bal-card"><div class="info">Overtime</div><div class="nums"><b>${totalOT.toFixed(1)}h</b></div></div>
+  `;
+}
+document.addEventListener('change',e=>{if(e.target.id==='myAttMonth')drawMyAtt()});
+
+function renderMyLeaves(){
+  const e=getMyEmp();if(!e)return;
+  const mine=db.leaves.filter(l=>l.empId===e.id).sort((a,b)=>b.from.localeCompare(a.from));
+  $('#myLeavesTable').innerHTML=mine.length?mine.map(l=>`
+    <tr><td>${l.type}</td><td>${l.from}</td><td>${l.to}</td><td>${l.days}</td>
+    <td><span class="badge ${l.status==='Approved'?'success':l.status==='Rejected'?'danger':'warn'}">${l.status}</span></td>
+    <td style="font-size:12px;color:var(--muted)">${l.reason||'-'}</td></tr>
+  `).join(''):'<tr><td colspan="6"><div class="empty">No requests yet</div></td></tr>';
+  // balances
+  const types=[
+    {name:'Annual',used:db.settings.annual-(e.annualBal||0),total:db.settings.annual,bal:e.annualBal||0},
+    {name:'Sick',used:db.settings.sick-(e.sickBal||0),total:db.settings.sick,bal:e.sickBal||0},
+    {name:'Emergency',used:0,total:db.settings.emergency,bal:db.settings.emergency},
+    {name:'Hajj',used:0,total:db.settings.hajj,bal:db.settings.hajj},
+  ];
+  $('#myLeaveBal').innerHTML=types.map(t=>`
+    <div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-weight:600">${t.name}</span><span class="emp-meta">${t.bal} / ${t.total} days</span></div>
+      <div class="progress"><div class="progress-bar" style="width:${(t.used/t.total)*100}%;background:${t.bal<5?'var(--danger)':'var(--primary)'}"></div></div>
+    </div>`).join('');
+}
+function openMyLeaveModal(){
+  const e=getMyEmp();if(!e)return;
+  // hide employee picker and status (employees can only request as themselves and Pending)
+  $('#lf_empWrap').style.display='none';
+  $('#lf_statusWrap').style.display='none';
+  $('#lf_emp').innerHTML=`<option value="${e.id}">${e.name}</option>`;
+  $('#lf_emp').value=e.id;
+  $('#lf_status').value='Pending';
+  $('#lf_from').value=todayStr();$('#lf_to').value=todayStr();$('#lf_reason').value='';
+  openModal('leaveModal');
+}
+
+function renderMyPayslips(){
+  $('#myPaySlipMonth').value=$('#myPaySlipMonth').value||monthStr();
+}
+function viewMyPayslip(){
+  const e=getMyEmp();if(!e)return;
+  const m=$('#myPaySlipMonth').value;
+  $('#myPayslipPreview').innerHTML='';
+  showPayslipInline(e.id,m,'#myPayslipPreview');
+}
+
+/* ===========================================
+   MANAGER / TEAM VIEW
+=========================================== */
+function renderTeam(){
+  const me=getMyEmp();if(!me){$('#teamTable').innerHTML='<tr><td colspan="5"><div class="empty">No team data</div></td></tr>';return}
+  const team=db.employees.filter(e=>e.manager===me.id);
+  $('#teamStats').innerHTML=`
+    ${statCard('◉','Team Size',team.length,'#0f4c81','#e8f1fb')}
+    ${statCard('✈','Pending Approvals',db.leaves.filter(l=>team.some(t=>t.id===l.empId)&&l.status==='Pending').length,'#c97a08','#fff4e0')}
+    ${statCard('●','Active Today',team.filter(t=>db.attendance.find(a=>a.empId===t.id&&a.date===todayStr()&&a.status==='Present')).length,'#1f9d55','#e6f7ee')}
+  `;
+  $('#teamTable').innerHTML=team.length?team.map(t=>{
+    const tod=db.attendance.find(a=>a.empId===t.id&&a.date===todayStr());
+    const pend=db.leaves.filter(l=>l.empId===t.id&&l.status==='Pending').length;
+    return `<tr>
+      <td><div class="emp-cell"><div class="avatar">${initials(t.name)}</div>
+        <div><div class="emp-name">${t.name}</div><div class="emp-meta">${t.id}</div></div></div></td>
+      <td>${t.position||'-'}</td>
+      <td>${tod?`<span class="badge success">In ${tod.in||'—'}</span>`:'<span class="badge muted">No record</span>'}</td>
+      <td>${t.annualBal||0} days</td>
+      <td>${pend>0?`<span class="badge warn">${pend}</span>`:'-'}</td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="5"><div class="empty">You have no direct reports</div></td></tr>';
+  // pending team leaves
+  const pending=db.leaves.filter(l=>team.some(t=>t.id===l.empId)&&l.status==='Pending');
+  $('#teamPendingLeaves').innerHTML=pending.length?pending.map(l=>{
+    const e=getEmp(l.empId);
+    return `<div class="leave-bal-card">
+      <div class="emp-cell"><div class="avatar">${initials(e?.name)}</div>
+        <div><div class="emp-name">${e?.name}</div>
+        <div class="emp-meta">${l.type} • ${l.from} → ${l.to} • ${l.days}d • ${l.reason||''}</div></div></div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-success btn-sm" onclick="approveLeave('${l.id}')">Approve</button>
+        <button class="btn btn-danger btn-sm" onclick="rejectLeave('${l.id}')">Reject</button>
+      </div>
+    </div>`;
+  }).join(''):'<div class="empty">No pending team requests</div>';
+}
+
+/* ===========================================
+   ADMIN: DASHBOARD
+=========================================== */
+function renderDashboard(){
+  const today=new Date();
+  $('#todayLabel').textContent=today.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const total=db.employees.filter(e=>e.status==='Active').length;
+  const onLeave=db.leaves.filter(l=>l.status==='Approved'&&new Date(l.from)<=today&&new Date(l.to)>=today).length;
+  const pendingLeaves=db.leaves.filter(l=>l.status==='Pending').length;
+  const totalSal=db.employees.filter(e=>e.status==='Active').reduce((s,e)=>s+(e.basic||0)+(e.housing||0)+(e.transport||0)+(e.otherAllow||0),0);
+  $('#dashStats').innerHTML=`
+    ${statCard('◉','Active Employees',total,'#0f4c81','#e8f1fb')}
+    ${statCard('✈','On Leave Today',onLeave,'#c97a08','#fff4e0')}
+    ${statCard('⌛','Pending Approvals',pendingLeaves,'#d9362b','#fdecea')}
+    ${statCard('₪','Monthly Payroll','SAR '+fmtMoney(totalSal),'#1f9d55','#e6f7ee')}
+  `;
+  const deptCounts={};
+  db.employees.forEach(e=>{if(e.status==='Active')deptCounts[e.dept]=(deptCounts[e.dept]||0)+1});
+  const max=Math.max(...Object.values(deptCounts),1);
+  $('#deptChart').innerHTML=Object.entries(deptCounts).map(([d,c])=>`
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px;font-weight:500">${d}</span><span style="font-size:13px;color:var(--muted)">${c}</span></div>
+      <div class="progress"><div class="progress-bar" style="width:${(c/max)*100}%"></div></div>
+    </div>`).join('')||'<div class="empty">No data</div>';
+  const pl=db.leaves.filter(l=>l.status==='Pending').slice(0,5);
+  $('#pendingLeave').innerHTML=pl.length?pl.map(l=>{
+    const e=getEmp(l.empId);
+    return `<div class="leave-bal-card">
+      <div class="emp-cell"><div class="avatar">${initials(e?.name||'?')}</div>
+      <div><div class="emp-name">${e?.name||'?'}</div><div class="emp-meta">${l.type} • ${l.days} days</div></div></div>
+      <div style="display:flex;gap:6px"><button class="btn btn-success btn-sm" onclick="approveLeave('${l.id}')">✓</button><button class="btn btn-danger btn-sm" onclick="rejectLeave('${l.id}')">✗</button></div>
+    </div>`;}).join(''):'<div class="empty">No pending requests</div>';
+  const ups=db.employees.filter(e=>e.dob).map(e=>{
+    const dob=new Date(e.dob);const next=new Date(today.getFullYear(),dob.getMonth(),dob.getDate());
+    if(next<today)next.setFullYear(today.getFullYear()+1);
+    return {e,next,days:Math.round((next-today)/(1000*60*60*24))};
+  }).filter(x=>x.days<=30).sort((a,b)=>a.days-b.days).slice(0,5);
+  $('#upBirthdays').innerHTML=ups.length?ups.map(x=>`
+    <div class="leave-bal-card"><div class="emp-cell"><div class="avatar">${initials(x.e.name)}</div>
+    <div><div class="emp-name">${x.e.name}</div><div class="emp-meta">${x.next.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div></div></div>
+    <span class="badge muted">in ${x.days}d</span></div>`).join(''):'<div class="empty">None in next 30 days</div>';
+  const exp=db.employees.filter(e=>e.iqamaExp).map(e=>({e,d:Math.round((new Date(e.iqamaExp)-today)/(1000*60*60*24)),date:e.iqamaExp})).filter(x=>x.d<=180).sort((a,b)=>a.d-b.d).slice(0,5);
+  $('#upExpiry').innerHTML=exp.length?exp.map(x=>`
+    <div class="leave-bal-card"><div class="emp-cell"><div class="avatar">${initials(x.e.name)}</div>
+    <div><div class="emp-name">${x.e.name}</div><div class="emp-meta">Iqama expires ${x.date}</div></div></div>
+    <span class="badge ${x.d<60?'danger':'warn'}">${x.d}d</span></div>`).join(''):'<div class="empty">All documents valid</div>';
+  const todAtt=db.attendance.filter(a=>a.date===todayStr());
+  const present=todAtt.filter(a=>a.status==='Present').length;
+  $('#todayAtt').innerHTML=`
+    <div style="display:flex;justify-content:space-around;padding:14px 0">
+      <div style="text-align:center"><div style="font-size:28px;font-weight:700;color:var(--success)">${present}</div><div class="emp-meta">Present</div></div>
+      <div style="text-align:center"><div style="font-size:28px;font-weight:700;color:var(--danger)">${Math.max(0,total-present)}</div><div class="emp-meta">Absent</div></div>
+      <div style="text-align:center"><div style="font-size:28px;font-weight:700;color:var(--warn)">${onLeave}</div><div class="emp-meta">On Leave</div></div>
+    </div>`;
+}
+function statCard(icon,label,value,color,bg){return `<div class="stat-card"><div class="stat-icon" style="background:${bg};color:${color}">${icon}</div><div class="stat-info"><div class="label">${label}</div><div class="value">${value}</div></div></div>`}
+
+/* ===========================================
+   ADMIN: EMPLOYEES
+=========================================== */
+function renderEmployees(){
+  $('#empDeptFilter').innerHTML='<option value="">All departments</option>'+db.departments.map(d=>`<option>${d}</option>`).join('');
+  drawEmpTable();
+}
+function drawEmpTable(){
+  const q=($('#empSearch')?.value||'').toLowerCase();
+  const dept=$('#empDeptFilter')?.value||'',status=$('#empStatusFilter')?.value||'';
+  const list=db.employees.filter(e=>{
+    if(q&&!(e.name.toLowerCase().includes(q)||e.id.toLowerCase().includes(q)))return false;
+    if(dept&&e.dept!==dept)return false;
+    if(status&&e.status!==status)return false;
+    return true;
+  });
+  $('#empTable').innerHTML=list.length?list.map(e=>`
+    <tr><td><div class="emp-cell"><div class="avatar">${initials(e.name)}</div>
+      <div><div class="emp-name">${e.name}</div><div class="emp-meta">${e.email||''}</div></div></div></td>
+      <td>${e.id}</td><td>${e.dept}</td><td>${e.position||'-'}</td><td>${e.joined||'-'}</td>
+      <td><span class="badge ${e.status==='Active'?'success':e.status==='Terminated'?'danger':'warn'}">${e.status}</span></td>
+      <td style="text-align:right">
+        <button class="btn-icon" onclick="openEmployeeModal('${e.id}')">✎</button>
+        <button class="btn-icon" onclick="deleteEmployee('${e.id}')">🗑</button></td></tr>
+  `).join(''):'<tr><td colspan="7"><div class="empty">No employees match.</div></td></tr>';
+}
+['empSearch','empDeptFilter','empStatusFilter'].forEach(id=>{
+  document.addEventListener('input',e=>{if(e.target.id===id)drawEmpTable()});
+  document.addEventListener('change',e=>{if(e.target.id===id)drawEmpTable()});
+});
+let editEmpId=null;
+function openEmployeeModal(id){
+  editEmpId=id||null;
+  $('#empModalTitle').textContent=id?'Edit Employee':'Add Employee';
+  $('#f_dept').innerHTML=db.departments.map(d=>`<option>${d}</option>`).join('');
+  $('#f_manager').innerHTML='<option value="">— None —</option>'+db.employees.map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
+  if(id){
+    const e=getEmp(id);
+    Object.entries({f_id:e.id,f_name:e.name,f_nameAr:e.nameAr,f_nationality:e.nationality,f_gender:e.gender,f_dob:e.dob,f_marital:e.marital,f_phone:e.phone,f_email:e.email,f_address:e.address,f_dept:e.dept,f_position:e.position,f_joined:e.joined,f_contract:e.contract,f_manager:e.manager,f_location:e.location,f_iqama:e.iqama,f_iqamaExp:e.iqamaExp,f_passport:e.passport,f_passportExp:e.passportExp,f_bank:e.bank,f_iban:e.iban,f_basic:e.basic,f_housing:e.housing,f_transport:e.transport,f_otherAllow:e.otherAllow,f_annualBal:e.annualBal,f_sickBal:e.sickBal,f_status:e.status}).forEach(([k,v])=>{const el=$('#'+k);if(el)el.value=v??''});
+  } else {
+    document.querySelectorAll('#empModal input,#empModal select').forEach(el=>{if(el.tagName==='SELECT')el.selectedIndex=0;else el.value=''});
+    $('#f_id').value='EMP'+String(db.employees.length+1).padStart(3,'0');
+    $('#f_status').value='Active';
+  }
+  $$('[data-emp-tab]').forEach(x=>x.classList.remove('active'));
+  document.querySelector('[data-emp-tab="basic"]').classList.add('active');
+  $$('.emp-tab').forEach(p=>p.style.display='none');$('#emp-tab-basic').style.display='block';
+  openModal('empModal');
+}
+function saveEmployee(){
+  const get=k=>$('#'+k).value,num=k=>Number($('#'+k).value)||0;
+  if(!get('f_id')||!get('f_name')){toast('ID and Name are required',true);return}
+  const obj={id:get('f_id'),name:get('f_name'),nameAr:get('f_nameAr'),nationality:get('f_nationality'),gender:get('f_gender'),dob:get('f_dob'),marital:get('f_marital'),phone:get('f_phone'),email:get('f_email'),address:get('f_address'),dept:get('f_dept'),position:get('f_position'),joined:get('f_joined'),contract:get('f_contract'),manager:get('f_manager'),location:get('f_location'),iqama:get('f_iqama'),iqamaExp:get('f_iqamaExp'),passport:get('f_passport'),passportExp:get('f_passportExp'),bank:get('f_bank'),iban:get('f_iban'),basic:num('f_basic'),housing:num('f_housing'),transport:num('f_transport'),otherAllow:num('f_otherAllow'),annualBal:num('f_annualBal'),sickBal:num('f_sickBal'),status:get('f_status')};
+  if(editEmpId){const i=db.employees.findIndex(x=>x.id===editEmpId);db.employees[i]=obj}
+  else{if(db.employees.find(x=>x.id===obj.id)){toast('Employee ID already exists',true);return}db.employees.push(obj)}
+  saveDB();closeModal('empModal');drawEmpTable();toast('Employee saved');
+}
+function deleteEmployee(id){
+  if(!confirm('Delete this employee?'))return;
+  db.employees=db.employees.filter(e=>e.id!==id);
+  // also remove user accounts linked to this employee
+  db.users=db.users.filter(u=>u.empId!==id);
+  saveDB();drawEmpTable();toast('Deleted');
+}
+
+/* ===========================================
+   ADMIN: USERS
+=========================================== */
+function renderUsers(){
+  $('#usersTable').innerHTML=db.users.map(u=>{
+    const e=u.empId?getEmp(u.empId):null;
+    return `<tr>
+      <td><b>${u.username}</b></td>
+      <td>${e?`<div class="emp-cell"><div class="avatar">${initials(e.name)}</div><div class="emp-name">${e.name}</div></div>`:'<span class="emp-meta">— None —</span>'}</td>
+      <td><span class="badge ${u.role==='admin'?'danger':u.role==='manager'?'warn':'info'}">${u.role}</span></td>
+      <td class="emp-meta">${u.lastLogin?new Date(u.lastLogin).toLocaleString():'Never'}</td>
+      <td style="text-align:right">
+        <button class="btn-icon" onclick="openUserModal('${u.username}')">✎</button>
+        ${u.username==='admin'?'':`<button class="btn-icon" onclick="deleteUser('${u.username}')">🗑</button>`}
+      </td></tr>`;
+  }).join('');
+}
+let editUsername=null;
+function openUserModal(username){
+  editUsername=username||null;
+  $('#userModalTitle').textContent=username?'Edit User':'New User';
+  $('#u_empId').innerHTML='<option value="">— None —</option>'+db.employees.map(e=>`<option value="${e.id}">${e.name} (${e.id})</option>`).join('');
+  if(username){
+    const u=db.users.find(x=>x.username===username);
+    $('#u_username').value=u.username;$('#u_username').disabled=true;
+    $('#u_password').value=u.password;$('#u_role').value=u.role;
+    $('#u_empId').value=u.empId||'';
+  } else {
+    $('#u_username').value='';$('#u_username').disabled=false;
+    $('#u_password').value='1234';$('#u_role').value='employee';$('#u_empId').value='';
+  }
+  onUserRoleChange();
+  openModal('userModal');
+}
+function onUserRoleChange(){
+  const role=$('#u_role').value;
+  $('#u_empWrap').style.display=role==='admin'?'none':'block';
+}
+function saveUser(){
+  const u=$('#u_username').value.trim().toLowerCase();
+  const p=$('#u_password').value;
+  const r=$('#u_role').value;
+  const empId=$('#u_empId').value||null;
+  if(!u||!p){toast('Username and password required',true);return}
+  if(r!=='admin'&&!empId){toast('Manager/Employee must be linked to an employee',true);return}
+  if(editUsername){
+    const ex=db.users.find(x=>x.username===editUsername);
+    ex.password=p;ex.role=r;ex.empId=r==='admin'?null:empId;
+  } else {
+    if(db.users.find(x=>x.username===u)){toast('Username already exists',true);return}
+    db.users.push({username:u,password:p,role:r,empId:r==='admin'?null:empId,lastLogin:''});
+  }
+  saveDB();closeModal('userModal');renderUsers();toast('User saved');
+}
+function deleteUser(username){
+  if(username===currentUser.username){toast('You cannot delete your own account',true);return}
+  if(!confirm('Delete this user account?'))return;
+  db.users=db.users.filter(u=>u.username!==username);
+  saveDB();renderUsers();toast('Deleted');
+}
+
+/* ===========================================
+   ADMIN: ATTENDANCE
+=========================================== */
+let clockTimer=null;
+function renderAttendance(){
+  const opts=db.employees.filter(e=>e.status==='Active').map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
+  $('#attEmployeeSelect').innerHTML=opts;$('#attMonthEmp').innerHTML=opts;
+  $('#attMonthPick').value=monthStr();
+  if(clockTimer)clearInterval(clockTimer);
+  const upd=()=>{const d=new Date();$('#liveClock').textContent=`${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;$('#liveDate').textContent=d.toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})};
+  upd();clockTimer=setInterval(upd,1000);
+  drawTodayAtt();drawAttSummary();
+}
+function checkIn(){
+  const empId=$('#attEmployeeSelect').value;if(!empId)return;
+  const t=todayStr();let rec=db.attendance.find(a=>a.empId===empId&&a.date===t);
+  const time=`${pad(new Date().getHours())}:${pad(new Date().getMinutes())}`;
+  if(rec){if(rec.in){toast('Already checked in',true);return}rec.in=time;rec.status='Present'}
+  else db.attendance.push({empId,date:t,in:time,out:'',hours:0,ot:0,status:'Present'});
+  saveDB();drawTodayAtt();drawAttSummary();toast('Checked in at '+time);
+}
+function checkOut(){
+  const empId=$('#attEmployeeSelect').value;if(!empId)return;
+  const t=todayStr();let rec=db.attendance.find(a=>a.empId===empId&&a.date===t);
+  if(!rec||!rec.in){toast('Check in first',true);return}
+  const now=new Date();rec.out=`${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const [ih,im]=rec.in.split(':').map(Number);
+  rec.hours=Math.round(((now.getHours()+now.getMinutes()/60)-(ih+im/60))*100)/100;
+  rec.ot=Math.max(0,Math.round((rec.hours-(db.settings.hours||8))*100)/100);
+  saveDB();drawTodayAtt();drawAttSummary();toast('Checked out');
+}
+function drawTodayAtt(){
+  const list=db.attendance.filter(a=>a.date===todayStr()).slice(-8).reverse();
+  $('#todayAttList').innerHTML=list.length?list.map(a=>{const e=getEmp(a.empId);return `
+    <div class="att-day"><div class="emp-cell"><div class="avatar">${initials(e?.name||'?')}</div>
+    <div><div class="emp-name">${e?.name||'?'}</div><div class="emp-meta">In: ${a.in||'-'} • Out: ${a.out||'-'}</div></div></div>
+    <div><span class="badge ${a.status==='Present'?'success':'danger'}">${a.status}</span></div></div>`}).join(''):'<div class="empty">No attendance recorded today</div>';
+}
+function drawAttSummary(){
+  const all=db.employees.filter(e=>e.status==='Active');
+  const todAtt=db.attendance.filter(a=>a.date===todayStr());
+  const present=todAtt.filter(a=>a.status==='Present').length;
+  const totHours=todAtt.reduce((s,a)=>s+(a.hours||0),0);
+  const totOT=todAtt.reduce((s,a)=>s+(a.ot||0),0);
+  $('#attSummary').innerHTML=`
+    <div class="leave-bal-card"><div class="info">Total Active</div><div class="nums"><b>${all.length}</b></div></div>
+    <div class="leave-bal-card"><div class="info">Present Today</div><div class="nums"><b style="color:var(--success)">${present}</b></div></div>
+    <div class="leave-bal-card"><div class="info">Absent</div><div class="nums"><b style="color:var(--danger)">${Math.max(0,all.length-present)}</b></div></div>
+    <div class="leave-bal-card"><div class="info">Total Hours</div><div class="nums"><b>${totHours.toFixed(1)}h</b></div></div>
+    <div class="leave-bal-card"><div class="info">Overtime</div><div class="nums"><b>${totOT.toFixed(1)}h</b></div></div>`;
+}
+function renderMonthAtt(){
+  const empId=$('#attMonthEmp').value,m=$('#attMonthPick').value||monthStr();
+  const list=db.attendance.filter(a=>a.empId===empId&&a.date.startsWith(m)).sort((a,b)=>a.date.localeCompare(b.date));
+  $('#attMonthTable').innerHTML=list.length?list.map(a=>`
+    <tr><td>${a.date}</td><td>${a.in||'-'}</td><td>${a.out||'-'}</td><td>${a.hours||0}</td><td>${a.ot||0}</td>
+    <td><span class="badge ${a.status==='Present'?'success':'danger'}">${a.status}</span></td></tr>`).join(''):'<tr><td colspan="6"><div class="empty">No records</div></td></tr>';
+}
+document.addEventListener('change',e=>{if(e.target.id==='attMonthEmp'||e.target.id==='attMonthPick')renderMonthAtt()});
+
+/* ===========================================
+   ADMIN: LEAVE
+=========================================== */
+function renderLeaves(){
+  const opts=db.employees.filter(e=>e.status==='Active').map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
+  $('#lf_emp').innerHTML=opts;$('#leaveBalEmp').innerHTML=opts;
+  drawLeaveTable();drawLeaveBal();
+}
+function drawLeaveTable(){
+  const st=$('#leaveStatusFilter').value,tp=$('#leaveTypeFilter').value;
+  const list=db.leaves.filter(l=>(!st||l.status===st)&&(!tp||l.type===tp)).sort((a,b)=>b.from.localeCompare(a.from));
+  $('#leaveTable').innerHTML=list.length?list.map(l=>{const e=getEmp(l.empId);return `
+    <tr><td><div class="emp-cell"><div class="avatar">${initials(e?.name||'?')}</div><div class="emp-name">${e?.name||'?'}</div></div></td>
+    <td>${l.type}</td><td>${l.from}</td><td>${l.to}</td><td>${l.days}</td>
+    <td><span class="badge ${l.status==='Approved'?'success':l.status==='Rejected'?'danger':'warn'}">${l.status}</span></td>
+    <td style="text-align:right">${l.status==='Pending'?`<button class="btn-icon" onclick="approveLeave('${l.id}')">✓</button><button class="btn-icon" onclick="rejectLeave('${l.id}')">✗</button>`:''}<button class="btn-icon" onclick="deleteLeave('${l.id}')">🗑</button></td></tr>`}).join(''):'<tr><td colspan="7"><div class="empty">No leave requests</div></td></tr>';
+}
+document.addEventListener('change',e=>{
+  if(e.target.id==='leaveStatusFilter'||e.target.id==='leaveTypeFilter')drawLeaveTable();
+  if(e.target.id==='leaveBalEmp')drawLeaveBal();
+});
+function openLeaveModal(){
+  $('#lf_empWrap').style.display='block';$('#lf_statusWrap').style.display='block';
+  $('#lf_emp').innerHTML=db.employees.filter(e=>e.status==='Active').map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
+  $('#lf_from').value=todayStr();$('#lf_to').value=todayStr();
+  $('#lf_reason').value='';$('#lf_status').value='Pending';
+  openModal('leaveModal');
+}
+function saveLeave(){
+  const empId=$('#lf_emp').value,from=$('#lf_from').value,to=$('#lf_to').value;
+  if(!empId||!from||!to){toast('All fields required',true);return}
+  if(new Date(to)<new Date(from)){toast('To date must be after From',true);return}
+  const leave={id:'LV'+Date.now(),empId,type:$('#lf_type').value,from,to,days:daysBetween(from,to),status:$('#lf_status').value,reason:$('#lf_reason').value};
+  db.leaves.push(leave);saveDB();
+  closeModal('leaveModal');
+  // refresh whichever view is active
+  if(currentUser.role==='admin'){drawLeaveTable();drawLeaveBal();renderDashboard()}
+  else renderMyLeaves();
+  toast('Leave request submitted');
+}
+function approveLeave(id){
+  const l=db.leaves.find(x=>x.id===id);if(!l)return;
+  l.status='Approved';
+  const e=getEmp(l.empId);
+  if(e){if(l.type==='Annual')e.annualBal=Math.max(0,(e.annualBal||0)-l.days);if(l.type==='Sick')e.sickBal=Math.max(0,(e.sickBal||0)-l.days)}
+  saveDB();
+  if(document.querySelector('#page-leave.active'))drawLeaveTable();
+  if(document.querySelector('#page-team.active'))renderTeam();
+  if(document.querySelector('#page-dashboard.active'))renderDashboard();
+  toast('Approved');
+}
+function rejectLeave(id){
+  const l=db.leaves.find(x=>x.id===id);if(!l)return;
+  l.status='Rejected';saveDB();
+  if(document.querySelector('#page-leave.active'))drawLeaveTable();
+  if(document.querySelector('#page-team.active'))renderTeam();
+  if(document.querySelector('#page-dashboard.active'))renderDashboard();
+  toast('Rejected');
+}
+function deleteLeave(id){if(!confirm('Delete?'))return;db.leaves=db.leaves.filter(l=>l.id!==id);saveDB();drawLeaveTable();toast('Deleted')}
+function drawLeaveBal(){
+  const id=$('#leaveBalEmp').value;const e=getEmp(id);if(!e)return;
+  const types=[{name:'Annual',used:db.settings.annual-(e.annualBal||0),total:db.settings.annual,bal:e.annualBal||0},{name:'Sick',used:db.settings.sick-(e.sickBal||0),total:db.settings.sick,bal:e.sickBal||0},{name:'Emergency',used:0,total:db.settings.emergency,bal:db.settings.emergency},{name:'Hajj',used:0,total:db.settings.hajj,bal:db.settings.hajj}];
+  $('#leaveBalances').innerHTML=types.map(t=>`<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-weight:600">${t.name}</span><span class="emp-meta">${t.bal} / ${t.total} days</span></div><div class="progress"><div class="progress-bar" style="width:${(t.used/t.total)*100}%;background:${t.bal<5?'var(--danger)':'var(--primary)'}"></div></div></div>`).join('');
+}
+
+/* ===========================================
+   ADMIN: PAYROLL
+=========================================== */
+function renderPayroll(){$('#payMonth').value=$('#payMonth').value||monthStr();drawPayroll()}
+function calcSlip(e,m){
+  const monthAtt=db.attendance.filter(a=>a.empId===e.id&&a.date.startsWith(m));
+  const otHours=monthAtt.reduce((s,a)=>s+(a.ot||0),0);
+  const presentDays=monthAtt.filter(a=>a.status==='Present').length;
+  const hourly=(e.basic||0)/22/(db.settings.hours||8);
+  const otPay=Math.round(otHours*hourly*(db.settings.ot||1.5)*100)/100;
+  const allow=(e.housing||0)+(e.transport||0)+(e.otherAllow||0);
+  const isSaudi=(e.nationality||'').toLowerCase()==='saudi';
+  const gosi=isSaudi?Math.round((e.basic+(e.housing||0))*(db.settings.gosiEmp/100)*100)/100:0;
+  const net=Math.round((e.basic+allow+otPay-gosi)*100)/100;
+  return {basic:e.basic,allow,otHours,otPay,gosi,net,presentDays,isSaudi};
+}
+function drawPayroll(){
+  const m=$('#payMonth').value;
+  $('#payMonthLabel').textContent=new Date(m+'-01').toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const slips=db.employees.filter(e=>e.status==='Active').map(e=>({e,...calcSlip(e,m)}));
+  const totalNet=slips.reduce((s,x)=>s+x.net,0);
+  const totalGosi=slips.reduce((s,x)=>s+x.gosi,0);
+  const totalOT=slips.reduce((s,x)=>s+x.otPay,0);
+  $('#payStats').innerHTML=`
+    ${statCard('₪','Total Net Pay','SAR '+fmtMoney(totalNet),'#0f4c81','#e8f1fb')}
+    ${statCard('◈','Total GOSI','SAR '+fmtMoney(totalGosi),'#c97a08','#fff4e0')}
+    ${statCard('◷','Overtime Pay','SAR '+fmtMoney(totalOT),'#1f9d55','#e6f7ee')}
+    ${statCard('◉','Employees Paid',slips.length,'#2563eb','#e3edff')}`;
+  $('#payTable').innerHTML=slips.map(({e,...s})=>`
+    <tr><td><div class="emp-cell"><div class="avatar">${initials(e.name)}</div><div><div class="emp-name">${e.name}</div><div class="emp-meta">${e.position||''}</div></div></div></td>
+    <td>${fmtMoney(s.basic)}</td><td>${fmtMoney(s.allow)}</td><td>${fmtMoney(s.otPay)}</td><td>0.00</td><td>${fmtMoney(s.gosi)}</td>
+    <td><b>${fmtMoney(s.net)}</b></td>
+    <td><button class="btn btn-secondary btn-sm" onclick="showPayslip('${e.id}','${m}')">Payslip</button></td></tr>`).join('');
+}
+document.addEventListener('change',e=>{if(e.target.id==='payMonth')drawPayroll()});
+function runPayroll(){
+  const m=$('#payMonth').value;
+  db.payroll=db.payroll.filter(p=>p.month!==m);
+  db.employees.filter(e=>e.status==='Active').forEach(e=>{
+    const s=calcSlip(e,m);
+    db.payroll.push({month:m,empId:e.id,basic:s.basic,allow:s.allow,ot:s.otPay,gosi:s.gosi,net:s.net});
+  });
+  saveDB();toast('Payroll finalized for '+m);drawPayroll();
+}
+function buildPayslipHTML(empId,month){
+  const e=getEmp(empId);const s=calcSlip(e,month);
+  const monthLabel=new Date(month+'-01').toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  return `<div class="payslip">
+    <div class="payslip-head">
+      <div><div style="font-size:18px;font-weight:700">${db.settings.company}</div>
+        <div class="emp-meta">CR: ${db.settings.cr} • ${db.settings.address}</div></div>
+      <div style="text-align:right"><div style="font-weight:700;color:var(--primary)">PAYSLIP</div>
+        <div class="emp-meta">${monthLabel}</div></div>
+    </div>
+    <div class="payslip-section"><h4>Employee</h4>
+      <div class="payslip-row"><span>Name</span><span><b>${e.name}</b></span></div>
+      <div class="payslip-row"><span>ID</span><span>${e.id}</span></div>
+      <div class="payslip-row"><span>Position</span><span>${e.position||'-'}</span></div>
+      <div class="payslip-row"><span>Department</span><span>${e.dept}</span></div>
+      <div class="payslip-row"><span>Iqama / National ID</span><span>${e.iqama||'-'}</span></div>
+      <div class="payslip-row"><span>IBAN</span><span style="font-family:monospace">${e.iban||'-'}</span></div>
+    </div>
+    <div class="payslip-section"><h4>Attendance Summary</h4>
+      <div class="payslip-row"><span>Days Present</span><span>${s.presentDays}</span></div>
+      <div class="payslip-row"><span>Overtime Hours</span><span>${s.otHours.toFixed(2)}</span></div>
+    </div>
+    <div class="payslip-section"><h4>Earnings (SAR)</h4>
+      <div class="payslip-row"><span>Basic</span><span>${fmtMoney(e.basic)}</span></div>
+      <div class="payslip-row"><span>Housing</span><span>${fmtMoney(e.housing)}</span></div>
+      <div class="payslip-row"><span>Transport</span><span>${fmtMoney(e.transport)}</span></div>
+      <div class="payslip-row"><span>Other Allowance</span><span>${fmtMoney(e.otherAllow)}</span></div>
+      <div class="payslip-row"><span>Overtime</span><span>${fmtMoney(s.otPay)}</span></div>
+      <div class="payslip-row total"><span>Gross</span><span>${fmtMoney(e.basic+s.allow+s.otPay)}</span></div>
+    </div>
+    <div class="payslip-section"><h4>Deductions (SAR)</h4>
+      <div class="payslip-row"><span>GOSI ${s.isSaudi?'('+db.settings.gosiEmp+'%)':'(N/A)'}</span><span>${fmtMoney(s.gosi)}</span></div>
+      <div class="payslip-row total"><span>Total Deductions</span><span>${fmtMoney(s.gosi)}</span></div>
+    </div>
+    <div class="payslip-row total" style="font-size:16px;background:var(--primary-light);padding:14px;border-radius:6px;border:none">
+      <span>NET PAY</span><span style="color:var(--primary)">SAR ${fmtMoney(s.net)}</span>
+    </div>
+    <div style="margin-top:18px;font-size:11px;color:var(--muted);text-align:center">System-generated payslip.</div>
+  </div>`;
+}
+function showPayslip(empId,month){$('#payslipBody').innerHTML=buildPayslipHTML(empId,month);openModal('payslipModal')}
+function showPayslipInline(empId,month,sel){$(sel).innerHTML=buildPayslipHTML(empId,month)}
+
+/* ===========================================
+   ADMIN: REPORTS
+=========================================== */
+function renderReports(){
+  const total=db.employees.length,active=db.employees.filter(e=>e.status==='Active').length;
+  $('#reportStats').innerHTML=`
+    ${statCard('◉','Total Records',total,'#0f4c81','#e8f1fb')}
+    ${statCard('●','Active Employees',active,'#1f9d55','#e6f7ee')}
+    ${statCard('✈','Leave Records',db.leaves.length,'#c97a08','#fff4e0')}
+    ${statCard('◷','Attendance Logs',db.attendance.length,'#2563eb','#e3edff')}`;
+}
+function csvEscape(v){if(v==null)return'';const s=String(v);return /[",\n]/.test(s)?`"${s.replace(/"/g,'""')}"`:s}
+function downloadCSV(name,rows){
+  const csv=rows.map(r=>r.map(csvEscape).join(',')).join('\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name+'.csv';a.click();
+  toast('Downloaded '+name+'.csv');
+}
+function exportCSV(type){
+  if(type==='employees'){
+    const rows=[['ID','Name','Name (AR)','Nationality','Gender','DOB','Phone','Email','Department','Position','Joined','Status','Iqama','Iqama Expiry','Basic','Housing','Transport','Other','IBAN']];
+    db.employees.forEach(e=>rows.push([e.id,e.name,e.nameAr,e.nationality,e.gender,e.dob,e.phone,e.email,e.dept,e.position,e.joined,e.status,e.iqama,e.iqamaExp,e.basic,e.housing,e.transport,e.otherAllow,e.iban]));
+    downloadCSV('employees',rows);
+  } else if(type==='attendance'){
+    const rows=[['Employee ID','Name','Date','Check In','Check Out','Hours','OT','Status']];
+    db.attendance.forEach(a=>{const e=getEmp(a.empId);rows.push([a.empId,e?.name||'',a.date,a.in,a.out,a.hours,a.ot,a.status])});
+    downloadCSV('attendance',rows);
+  } else if(type==='leaves'){
+    const rows=[['ID','Employee','Type','From','To','Days','Status','Reason']];
+    db.leaves.forEach(l=>{const e=getEmp(l.empId);rows.push([l.id,e?.name||'',l.type,l.from,l.to,l.days,l.status,l.reason])});
+    downloadCSV('leaves',rows);
+  } else if(type==='payroll'){
+    const rows=[['Month','Employee ID','Name','Basic','Allowances','OT','GOSI','Net Pay']];
+    db.payroll.forEach(p=>{const e=getEmp(p.empId);rows.push([p.month,p.empId,e?.name||'',p.basic,p.allow,p.ot,p.gosi,p.net])});
+    if(!db.payroll.length)toast('Run payroll first',true);else downloadCSV('payroll',rows);
+  } else if(type==='expiry'){
+    const rows=[['ID','Name','Doc Type','Number','Expiry','Days Left']];const today=new Date();
+    db.employees.forEach(e=>{
+      if(e.iqamaExp){const d=Math.round((new Date(e.iqamaExp)-today)/(1000*60*60*24));rows.push([e.id,e.name,'Iqama',e.iqama,e.iqamaExp,d])}
+      if(e.passportExp){const d=Math.round((new Date(e.passportExp)-today)/(1000*60*60*24));rows.push([e.id,e.name,'Passport',e.passport,e.passportExp,d])}
+    });
+    downloadCSV('expiry',rows);
+  }
+}
+function backupJSON(){
+  const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`aljaser_hr_backup_${todayStr()}.json`;a.click();
+  toast('Backup downloaded');
+}
+function restoreJSON(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{try{const data=JSON.parse(ev.target.result);if(!data.employees||!data.settings)throw 0;
+    if(!confirm('REPLACE all current data?'))return;db=data;saveDB();renderDashboard();renderEmployees();toast('Restored')}
+    catch(err){toast('Invalid file',true)}};
+  r.readAsText(f);
+}
+
+/* ===========================================
+   ADMIN: SETTINGS
+=========================================== */
+function renderSettings(){
+  const s=db.settings;
+  $('#setCompany').value=s.company;$('#setCR').value=s.cr;
+  $('#setAddress').value=s.address;$('#setPhone').value=s.phone;
+  $('#setEmail').value=s.email;$('#setCurrency').value=s.currency;
+  $('#setAnnual').value=s.annual;$('#setSick').value=s.sick;
+  $('#setEmergency').value=s.emergency;$('#setHajj').value=s.hajj;
+  $('#setHours').value=s.hours;$('#setOT').value=s.ot;
+  $('#setGosiEmp').value=s.gosiEmp;$('#setGosiCo').value=s.gosiCo;
+}
+function saveSettings(){
+  db.settings={company:$('#setCompany').value,cr:$('#setCR').value,address:$('#setAddress').value,phone:$('#setPhone').value,email:$('#setEmail').value,currency:$('#setCurrency').value,annual:+$('#setAnnual').value,sick:+$('#setSick').value,emergency:+$('#setEmergency').value,hajj:+$('#setHajj').value,hours:+$('#setHours').value,ot:+$('#setOT').value,gosiEmp:+$('#setGosiEmp').value,gosiCo:+$('#setGosiCo').value};
+  saveDB();toast('Settings saved');
+}
+function resetDemoData(){
+  if(!confirm('Reset all data? You will lose any changes.'))return;
+  localStorage.removeItem(LS_KEY);localStorage.removeItem(SESS_KEY);
+  db=loadDB();currentUser=null;doLogout();toast('Demo data reset');
+}
+
+/* global search (admin only) */
+$('#globalSearch').addEventListener('input',e=>{
+  const q=e.target.value.toLowerCase();if(!q)return;
+  $('#empSearch').value=q;goPage('employees');drawEmpTable();
+});
+
+/* ===========================================
+   INIT
+=========================================== */
+if(checkSession()){enterApp()}
+else{$('#app').style.display='none';$('#loginScreen').classList.remove('hidden')}
+</script>
+</body>
+</html>
